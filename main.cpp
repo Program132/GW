@@ -1,6 +1,14 @@
 #include <iostream>
 
+#include "tests/TestsList.h"
+
 int main() {
-  std::cout << "Hello World" << std::endl;
+  /* =================== Tests =================== */
+  /* =================== LISTS =================== */
+  testIntList();
+  testStringList();
+  /* ============================================= */
+  /* ============================================= */
+
   return 0;
 }
