@@ -7,9 +7,9 @@
 
 class Token {
 private:
-  TokenType type;
-  std::string value;
-  int line;
+  TokenType type = TokenType::WHITESPACE;
+  std::string value = "";
+  int line = 1;
 
 public:
   Token() = default;
