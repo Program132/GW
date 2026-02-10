@@ -21,6 +21,8 @@ public:
   void lex();
   bool isDigit(char c);
   bool isAlpha(char c);
+  bool isMathOperator(char c);
+  bool isOperator(char c);
 };
 
 #endif
