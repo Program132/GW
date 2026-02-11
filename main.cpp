@@ -1,5 +1,7 @@
+#include "tests/TestsExpression.h"
 #include "tests/TestsLexer.h"
 #include "tests/TestsList.h"
+#include "tests/TestsStatement.h"
 #include "tests/TestsToken.h"
 
 int main() {
@@ -33,6 +35,18 @@ int main() {
   testLexerParenthesesAndBrackets();
   testLexerEmptyString();
   testLexerWhitespaceOnly();
+  /* ============================================= */
+  /* ============================================= */
+
+  /* =================== TESTS =================== */
+  /* =================== Expressions ============= */
+  testExpression();
+  /* ============================================= */
+  /* ============================================= */
+
+  /* =================== TESTS =================== */
+  /* =================== Statements ============= */
+  testStatement();
   /* ============================================= */
   /* ============================================= */
 
