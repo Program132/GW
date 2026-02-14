@@ -28,6 +28,11 @@ public:
   ExpressionType getType() const;
 };
 
+class EmptyExpression : public Expression {
+public:
+  EmptyExpression();
+};
+
 class BinaryExpression : public Expression {
 private:
   Expression left;

@@ -5,6 +5,8 @@ Expression::Expression(ExpressionType type) { this->type = type; }
 
 ExpressionType Expression::getType() const { return type; }
 
+EmptyExpression::EmptyExpression() : Expression(EMPTY_EXPR) {}
+
 BinaryExpression::BinaryExpression(Expression left, Token op, Expression right)
     : Expression(BINARY), left(left), op(op), right(right) {}
 
