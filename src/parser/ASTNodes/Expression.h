@@ -18,14 +18,17 @@ enum ExpressionType {
 };
 
 class Expression {
-private:
+protected:
   ExpressionType type;
+  Token token;
 
 public:
   Expression();
   Expression(ExpressionType type);
+  Expression(ExpressionType type, Token token);
 
   ExpressionType getType() const;
+  Token getToken() const;
 };
 
 class EmptyExpression : public Expression {
