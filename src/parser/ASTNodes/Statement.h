@@ -27,6 +27,16 @@ public:
   Expression getExpression() const;
 };
 
+class PrintlnStatement : public Statement {
+private:
+  Expression expression;
+
+public:
+  PrintlnStatement(Expression expression);
+
+  Expression getExpression() const;
+};
+
 class VarDeclarationStatement : public Statement {
 private:
   Token name;

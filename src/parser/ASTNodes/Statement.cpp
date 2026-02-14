@@ -10,6 +10,11 @@ PrintStatement::PrintStatement(Expression expression)
 
 Expression PrintStatement::getExpression() const { return expression; }
 
+PrintlnStatement::PrintlnStatement(Expression expression)
+    : expression(expression) {}
+
+Expression PrintlnStatement::getExpression() const { return expression; }
+
 VarDeclarationStatement::VarDeclarationStatement(Token name) : name(name) {}
 
 VarDeclarationStatement::VarDeclarationStatement(Token name,
