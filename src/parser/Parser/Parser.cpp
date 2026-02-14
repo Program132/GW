@@ -1,16 +1,62 @@
 #include "Parser.h"
-#include <exception>
 
 Parser::Parser(List<Token> tokens) : tokens(tokens), current(0) {}
 
 void Parser::parse() {
   while (!isAtEnd()) {
+    statements.append(statement());
   }
 }
 
 List<Statement> Parser::getStatements() const { return statements; }
 
 bool Parser::isAtEnd() const { return this->current >= this->tokens.size(); }
+
+bool Parser::checkIdentifier(std::string name) {
+  if (isAtEnd())
+    return false;
+  return peek().getType() == TokenType::IDENTIFIER && peek().getValue() == name;
+}
+
+bool Parser::checkType(TokenType type) {
+  if (isAtEnd())
+    return false;
+  return peek().getType() == type;
+}
+
+bool Parser::checkOperator(std::string value) {
+  if (isAtEnd())
+    return false;
+  TokenType type = peek().getType();
+  return (type == TokenType::OPERATOR || type == TokenType::MATH_OPERATOR ||
+          type == TokenType::EQUAL_OPERATOR ||
+          type == TokenType::DOUBLE_EQUAL_OPERATOR ||
+          type == TokenType::LESS_OPERATOR ||
+          type == TokenType::GREATER_OPERATOR ||
+          type == TokenType::LESS_EQUAL_OPERATOR ||
+          type == TokenType::GREATER_EQUAL_OPERATOR ||
+          type == TokenType::AND_OPERATOR || type == TokenType::OR_OPERATOR ||
+          type == TokenType::NOT_OPERATOR) &&
+         peek().getValue() == value;
+}
+
+bool Parser::matchOperator(std::string value) {
+  if (checkOperator(value)) {
+    advance();
+    return true;
+  }
+  return false;
+}
+
+bool Parser::matchType(List<TokenType> types) {
+  for (int i = 0; i < types.size(); i++) {
+    if (checkType(types.get(i))) {
+      advance();
+      return true;
+    }
+  }
+  return false;
+}
 
 Token Parser::peek() { return this->tokens.get(this->current); }
 
@@ -42,15 +88,12 @@ Expression Parser::assignment() {
     Token baseOp = Token(TokenType::MATH_OPERATOR, base_op_value, op.getLine());
 
     if (expression.getType() == ExpressionType::VARIABLE) {
-      VariableExpression &expr = (VariableExpression &)expression;
       BinaryExpression nvalue = BinaryExpression(expression, baseOp, value);
-      Token name = expr.getName();
-      return AssignExpression(name, nvalue);
+      return AssignExpression(expression.getToken(), nvalue);
     } else if (expression.getType() == ExpressionType::GET) {
       GetExpression &expr = (GetExpression &)expression;
       BinaryExpression nvalue = BinaryExpression(expression, baseOp, value);
-      Token name = expr.getName();
-      return SetExpression(expr.getObject(), name, nvalue);
+      return SetExpression(expr.getObject(), expression.getToken(), nvalue);
     } else {
       throw std::runtime_error("Error: Invalid target assignation line " +
                                std::to_string(op.getLine()));
@@ -60,11 +103,10 @@ Expression Parser::assignment() {
     Expression value = this->assignment();
 
     if (expression.getType() == ExpressionType::VARIABLE) {
-      VariableExpression &expr = (VariableExpression &)expression;
-      return AssignExpression(expr.getName(), value);
+      return AssignExpression(expression.getToken(), value);
     } else if (expression.getType() == ExpressionType::GET) {
       GetExpression &expr = (GetExpression &)expression;
-      return SetExpression(expr.getObject(), expr.getName(), value);
+      return SetExpression(expr.getObject(), expression.getToken(), value);
     } else {
       throw std::runtime_error("Error: Invalid target assignation line " +
                                std::to_string(previous.getLine()));
@@ -180,15 +222,18 @@ Expression Parser::primary() {
     Expression expression = this->getExpression();
     this->consume(TokenType::OPERATOR, ")", "Expected ')'");
     return GroupingExpression(expression);
-  } else if (this->matchType(TokenType::NUMBER)) {
-    return LiteralExpression(this->previous());
-  } else if (this->matchType(TokenType::STRING)) {
+  } else if (this->matchType(TokenType::INT) ||
+             this->matchType(TokenType::NUMBER) ||
+             this->matchType(TokenType::BOOLEAN) ||
+             this->matchType(TokenType::STRING)) {
     return LiteralExpression(this->previous());
   } else if (this->matchType(TokenType::IDENTIFIER)) {
     return VariableExpression(this->previous());
   } else {
-    throw std::runtime_error("Error: Unexpected token line " +
-                             std::to_string(this->peek().getLine()));
+    throw std::runtime_error("Error: Unexpected token \"" +
+                             this->peek().getValue() + "\" type " +
+                             tokenTypeToString(this->peek().getType()) +
+                             " line " + std::to_string(this->peek().getLine()));
   }
 }
 
