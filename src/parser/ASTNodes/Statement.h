@@ -5,7 +5,37 @@
 #include "DataTypes.h"
 #include "Expression.h"
 
-class Statement {};
+enum StatementType {
+  EXPRESSION_STATEMENT,
+  PRINT_STATEMENT,
+  PRINTLN_STATEMENT,
+  VAR_DECLARATION,
+  BLOCK,
+  IF,
+  WHILE,
+  FOR,
+  FUNCTION_DECLARATION,
+  RETURN,
+  STRUCT_DECLARATION,
+  BREAK,
+  CONTINUE,
+  CONSTRUCTOR_DECLARATION,
+  CLASS_DECLARATION,
+  OPERATOR_DECLARATION
+};
+
+class Statement {
+protected:
+  StatementType type;
+  Token token;
+
+public:
+  Statement();
+  Statement(StatementType type);
+  Statement(StatementType type, Token token);
+  StatementType getType() const;
+  Token getToken() const;
+};
 
 class ExpressionStatement : public Statement {
 private:
