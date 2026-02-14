@@ -38,12 +38,12 @@ public:
 
   void insert(int index, T data);
 
-  T get(int index);
+  T get(int index) const;
   void set(int index, T data);
 
-  void print();
+  void print() const;
 
-  int size();
+  int size() const;
 
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os, const List<U> &list);
@@ -198,7 +198,7 @@ template <typename T> void List<T>::insert(int index, T data) {
   listSize++;
 }
 
-template <typename T> T List<T>::get(int index) {
+template <typename T> T List<T>::get(int index) const {
   if (index < 0 || index >= listSize) {
     throw std::out_of_range("Index out of range");
   }
@@ -224,7 +224,7 @@ template <typename T> void List<T>::set(int index, T data) {
   current->data = data;
 }
 
-template <typename T> void List<T>::print() {
+template <typename T> void List<T>::print() const {
   ListNode<T> *current = head;
   while (current != nullptr) {
     std::cout << current->data << " ";
@@ -233,7 +233,7 @@ template <typename T> void List<T>::print() {
   std::cout << std::endl;
 }
 
-template <typename T> int List<T>::size() { return listSize; }
+template <typename T> int List<T>::size() const { return listSize; }
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const List<T> &list) {
