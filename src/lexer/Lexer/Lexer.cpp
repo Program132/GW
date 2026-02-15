@@ -249,3 +249,12 @@ bool Lexer::isOperator(char c) {
   return c == ',' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' ||
          c == ']' || c == ':' || c == ';' || c == '?';
 }
+
+std::ostream &operator<<(std::ostream &os, const Lexer &lexer) {
+  os << "Tokens:" << std::endl;
+  for (int i = 0; i < lexer.tokens.size(); i++) {
+    Token t = lexer.tokens.get(i);
+    os << "  " << t.getType() << ": '" << t.getValue() << "'" << std::endl;
+  }
+  return os;
+}

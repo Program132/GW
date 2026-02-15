@@ -47,6 +47,8 @@ public:
   ExpressionStatement expressionStatement();
   PrintStatement printStatement();
   PrintlnStatement printlnStatement();
+
+  friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
 
 #endif // PARSER_H

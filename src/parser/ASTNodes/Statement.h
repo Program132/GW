@@ -28,43 +28,40 @@ class Statement {
 protected:
   StatementType type;
   Token token;
+  Expression expression;
 
 public:
   Statement();
   Statement(StatementType type);
   Statement(StatementType type, Token token);
+  Statement(StatementType type, Expression expression);
+  Statement(StatementType type, Token token, Expression expression);
   StatementType getType() const;
   Token getToken() const;
+  Expression getExpression() const;
+
+  friend std::ostream &operator<<(std::ostream &os, const Statement &statement);
 };
 
 class ExpressionStatement : public Statement {
-private:
-  Expression expression;
-
 public:
   ExpressionStatement(Expression expression);
-
-  Expression getExpression() const;
 };
 
 class PrintStatement : public Statement {
-private:
-  Expression expression;
-
 public:
   PrintStatement(Expression expression);
 
-  Expression getExpression() const;
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const PrintStatement &printStatement);
 };
 
 class PrintlnStatement : public Statement {
-private:
-  Expression expression;
-
 public:
   PrintlnStatement(Expression expression);
 
-  Expression getExpression() const;
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const PrintlnStatement &printlnStatement);
 };
 
 class VarDeclarationStatement : public Statement {

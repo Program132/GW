@@ -23,6 +23,8 @@ public:
   bool isAlpha(char c);
   bool isMathOperator(char c);
   bool isOperator(char c);
+
+  friend std::ostream &operator<<(std::ostream &os, const Lexer &lexer);
 };
 
 #endif

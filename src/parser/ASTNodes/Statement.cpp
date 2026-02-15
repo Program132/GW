@@ -7,23 +7,90 @@ Statement::Statement(StatementType type) : type(type), token(Token()) {}
 Statement::Statement(StatementType type, Token token)
     : type(type), token(token) {}
 
+Statement::Statement(StatementType type, Expression expression)
+    : type(type), token(Token()), expression(expression) {}
+
+Statement::Statement(StatementType type, Token token, Expression expression)
+    : type(type), token(token), expression(expression) {}
+
 StatementType Statement::getType() const { return type; }
 Token Statement::getToken() const { return token; }
+Expression Statement::getExpression() const { return expression; }
+
+std::ostream &operator<<(std::ostream &os, const Statement &statement) {
+  switch (statement.getType()) {
+  case EXPRESSION_STATEMENT:
+    os << "EXPRESSION_STATEMENT";
+    break;
+  case PRINT_STATEMENT:
+    os << "PRINT_STATEMENT";
+    break;
+  case PRINTLN_STATEMENT:
+    os << "PRINTLN_STATEMENT";
+    break;
+  case VAR_DECLARATION:
+    os << "VAR_DECLARATION";
+    break;
+  case BLOCK:
+    os << "BLOCK";
+    break;
+  case IF:
+    os << "IF";
+    break;
+  case WHILE:
+    os << "WHILE";
+    break;
+  case FOR:
+    os << "FOR";
+    break;
+  case FUNCTION_DECLARATION:
+    os << "FUNCTION_DECLARATION";
+    break;
+  case RETURN:
+    os << "RETURN";
+    break;
+  case STRUCT_DECLARATION:
+    os << "STRUCT_DECLARATION";
+    break;
+  case BREAK:
+    os << "BREAK";
+    break;
+  case CONTINUE:
+    os << "CONTINUE";
+    break;
+  case CONSTRUCTOR_DECLARATION:
+    os << "CONSTRUCTOR_DECLARATION";
+    break;
+  case CLASS_DECLARATION:
+    os << "CLASS_DECLARATION";
+    break;
+  case OPERATOR_DECLARATION:
+    os << "OPERATOR_DECLARATION";
+    break;
+  }
+  return os;
+}
 
 ExpressionStatement::ExpressionStatement(Expression expression)
-    : Statement(EXPRESSION_STATEMENT), expression(expression) {}
-
-Expression ExpressionStatement::getExpression() const { return expression; }
+    : Statement(EXPRESSION_STATEMENT, expression) {}
 
 PrintStatement::PrintStatement(Expression expression)
-    : Statement(PRINT_STATEMENT), expression(expression) {}
+    : Statement(PRINT_STATEMENT, expression) {}
 
-Expression PrintStatement::getExpression() const { return expression; }
+std::ostream &operator<<(std::ostream &os,
+                         const PrintStatement &printStatement) {
+  os << "PRINT_STATEMENT{" << printStatement.getExpression() << "}";
+  return os;
+}
 
 PrintlnStatement::PrintlnStatement(Expression expression)
-    : Statement(PRINTLN_STATEMENT), expression(expression) {}
+    : Statement(PRINTLN_STATEMENT, expression) {}
 
-Expression PrintlnStatement::getExpression() const { return expression; }
+std::ostream &operator<<(std::ostream &os,
+                         const PrintlnStatement &printlnStatement) {
+  os << "PRINTLN_STATEMENT{" << printlnStatement.getExpression() << "}";
+  return os;
+}
 
 VarDeclarationStatement::VarDeclarationStatement(Token name)
     : Statement(VAR_DECLARATION, name), name(name) {}

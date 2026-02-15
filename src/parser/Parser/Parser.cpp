@@ -282,3 +282,12 @@ PrintlnStatement Parser::printlnStatement() {
 
   return PrintlnStatement(expression);
 }
+
+std::ostream &operator<<(std::ostream &os, const Parser &parser) {
+  os << "Statements:" << std::endl;
+  for (int i = 0; i < parser.statements.size(); i++) {
+    Statement s = parser.statements.get(i);
+    os << "  " << s << std::endl;
+  }
+  return os;
+}
