@@ -256,6 +256,8 @@ Statement Parser::statement() {
     return printStatement();
   } else if (checkIdentifier("println")) {
     return printlnStatement();
+  } else if (checkIdentifier("var")) {
+    return varDeclarationStatement();
   } else {
     return expressionStatement();
   }
@@ -295,6 +297,26 @@ PrintlnStatement Parser::printlnStatement() {
   this->consume(TokenType::OPERATOR, ";", "Expected ';'");
 
   return PrintlnStatement(expression);
+}
+
+VarDeclarationStatement Parser::varDeclarationStatement() {
+  this->advance();
+
+  if (!this->checkType(TokenType::IDENTIFIER)) {
+    throw std::runtime_error("Error: Expected identifier");
+  }
+
+  Token name = this->advance();
+
+  Expression expression = EmptyExpression();
+  if (this->matchOperator("=")) {
+    expression = this->getExpression();
+  }
+
+  this->consume(TokenType::OPERATOR, ";",
+                "Expected ';' line " + std::to_string(name.getLine()));
+
+  return VarDeclarationStatement(name, expression);
 }
 
 std::ostream &operator<<(std::ostream &os, const Parser &parser) {

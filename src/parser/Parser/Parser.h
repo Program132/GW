@@ -48,6 +48,7 @@ public:
   ExpressionStatement expressionStatement();
   PrintStatement printStatement();
   PrintlnStatement printlnStatement();
+  VarDeclarationStatement varDeclarationStatement();
 
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };

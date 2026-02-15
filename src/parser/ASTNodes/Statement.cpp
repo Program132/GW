@@ -97,7 +97,8 @@ VarDeclarationStatement::VarDeclarationStatement(Token name)
 
 VarDeclarationStatement::VarDeclarationStatement(Token name,
                                                  Expression initializer)
-    : Statement(VAR_DECLARATION, name), name(name), initializer(initializer) {}
+    : Statement(VAR_DECLARATION, name, initializer), name(name),
+      initializer(initializer) {}
 
 Token VarDeclarationStatement::getName() const { return name; }
 
