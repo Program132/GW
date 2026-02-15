@@ -26,9 +26,13 @@ public:
   Expression();
   Expression(ExpressionType type);
   Expression(ExpressionType type, Token token);
+  virtual ~Expression() = default;
 
   ExpressionType getType() const;
   Token getToken() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const Expression &expression);
 };
 
 class EmptyExpression : public Expression {
@@ -48,6 +52,9 @@ public:
   Expression getLeft() const;
   Token getOp() const;
   Expression getRight() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const BinaryExpression &binaryExpression);
 };
 
 class UnaryExpression : public Expression {
@@ -60,6 +67,9 @@ public:
 
   Token getOp() const;
   Expression getRight() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const UnaryExpression &unaryExpression);
 };
 
 class LiteralExpression : public Expression {
@@ -70,6 +80,9 @@ public:
   LiteralExpression(Token value);
 
   Token getValue() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const LiteralExpression &literalExpression);
 };
 
 class GroupingExpression : public Expression {
@@ -80,6 +93,9 @@ public:
   GroupingExpression(Expression expression);
 
   Expression getExpression() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const GroupingExpression &groupingExpression);
 };
 
 class VariableExpression : public Expression {
@@ -90,6 +106,9 @@ public:
   VariableExpression(Token name);
 
   Token getName() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const VariableExpression &variableExpression);
 };
 
 class AssignExpression : public Expression {
@@ -102,6 +121,9 @@ public:
 
   Token getName() const;
   Expression getValue() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const AssignExpression &assignExpression);
 };
 
 class CallExpression : public Expression {
@@ -116,6 +138,9 @@ public:
   Expression getCallee() const;
   Token getParen() const;
   List<Expression> getArguments() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const CallExpression &callExpression);
 };
 
 class GetExpression : public Expression {
@@ -128,6 +153,9 @@ public:
 
   Expression getObject() const;
   Token getName() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const GetExpression &getExpression);
 };
 
 class SetExpression : public Expression {
@@ -142,6 +170,9 @@ public:
   Expression getObject() const;
   Token getName() const;
   Expression getValue() const;
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const SetExpression &setExpression);
 };
 
 #endif // EXPRESSION_H
