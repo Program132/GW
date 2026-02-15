@@ -41,6 +41,7 @@ public:
   Expression comparison();
   Expression addition_subtraction();
   Expression multiplication_division();
+  Expression exponentiation();
   Expression unary();
   Expression call();
 

@@ -35,6 +35,7 @@ bool Parser::checkOperator(std::string value) {
           type == TokenType::GREATER_OPERATOR ||
           type == TokenType::LESS_EQUAL_OPERATOR ||
           type == TokenType::GREATER_EQUAL_OPERATOR ||
+          type == TokenType::DIFFERENT_OPERATOR ||
           type == TokenType::AND_OPERATOR || type == TokenType::OR_OPERATOR ||
           type == TokenType::NOT_OPERATOR) &&
          peek().getValue() == value;
@@ -177,10 +178,22 @@ Expression Parser::addition_subtraction() {
 }
 
 Expression Parser::multiplication_division() {
-  Expression expression = this->unary();
+  Expression expression = this->exponentiation();
 
   while (this->matchOperator("*") || this->matchOperator("/") ||
          this->matchOperator("%")) {
+    Token op = this->previous();
+    Expression right = this->exponentiation();
+    expression = BinaryExpression(expression, op, right);
+  }
+
+  return expression;
+}
+
+Expression Parser::exponentiation() {
+  Expression expression = this->unary();
+
+  while (this->matchOperator("^")) {
     Token op = this->previous();
     Expression right = this->unary();
     expression = BinaryExpression(expression, op, right);
@@ -190,7 +203,8 @@ Expression Parser::multiplication_division() {
 }
 
 Expression Parser::unary() {
-  if (this->matchOperator("!") || this->matchOperator("-")) {
+  if (this->matchOperator("!") || this->matchOperator("-") ||
+      this->matchOperator("+")) {
     Token op = this->previous();
     Expression right = this->unary();
     return UnaryExpression(op, right);

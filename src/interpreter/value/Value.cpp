@@ -214,7 +214,11 @@ Value Value::operator/(const Value &other) const {
     throw std::runtime_error("Division by zero");
   }
 
-  return Value(this->toNumber() / divisor);
+  double result = this->toNumber() / divisor;
+  if (this->isInt() && other.isInt() && result == static_cast<int>(result)) {
+    return Value(static_cast<int>(result));
+  }
+  return Value(result);
 }
 
 Value Value::operator%(const Value &other) const {
@@ -242,7 +246,11 @@ Value Value::pow(const Value &other) const {
     throw std::runtime_error("Cannot exponentiate non-numeric values");
   }
 
-  return Value(std::pow(this->toNumber(), other.toNumber()));
+  double result = std::pow(this->toNumber(), other.toNumber());
+  if (this->isInt() && other.isInt() && result == static_cast<int>(result)) {
+    return Value(static_cast<int>(result));
+  }
+  return Value(result);
 }
 
 bool Value::operator==(const Value &other) const {

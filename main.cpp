@@ -6,7 +6,14 @@
 #include "tests/TestsStatement.h"
 #include "tests/TestsToken.h"
 
-int main() {
+#include "src/utils/FileReader.h"
+#include "src/utils/REPL.h"
+
+#include "src/interpreter/Interpreter/Interpreter.h"
+#include "src/lexer/Lexer/Lexer.h"
+#include "src/parser/Parser/Parser.h"
+
+int main(int argc, char *argv[]) {
   /* =================== TESTS =================== */
   /* =================== Lists =================== */
   testIntList();
@@ -65,6 +72,31 @@ int main() {
   testInterpreterPrint();
   /* ============================================= */
   /* ============================================= */
+
+  if (argc > 1) {
+    FileReader fileReader(argv[1]);
+    Lexer lex = Lexer(fileReader.getContent());
+    Parser parser = Parser(lex.getTokens());
+    Interpreter interpreter = Interpreter(parser.getStatements());
+    interpreter.interpret();
+  } else {
+    REPL repl = REPL("GW> ");
+    repl.start();
+
+    while (true) {
+      std::string line = repl.readLine();
+      if (line == "exit" || line == "quit")
+        break;
+
+      Lexer lex(line);
+      lex.lex();
+      Parser p(lex.getTokens());
+      p.parse();
+      Interpreter interp(p.getStatements());
+      interp.interpret();
+      std::cout << std::endl;
+    }
+  }
 
   return 0;
 }

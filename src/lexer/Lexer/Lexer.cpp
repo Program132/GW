@@ -202,7 +202,8 @@ void Lexer::lex() {
           this->appendToken();
         }
         // ~=
-        else if (this->current.getType() == TokenType::GREATER_OPERATOR) {
+        else if (this->current.getType() == TokenType::OPERATOR &&
+                 this->current.getValue() == "~") {
           this->current.setType(TokenType::DIFFERENT_OPERATOR);
           this->current.appendCharacter(c);
           this->appendToken();

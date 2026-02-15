@@ -71,15 +71,11 @@ Value Interpreter::evaluate(Expression expression) {
     return Value(std::string("[Variable: ") + varName + "]");
   }
   case GROUPING: {
-    GroupingExpression &grouping = dynamic_cast<GroupingExpression &>(
-        const_cast<Expression &>(expression));
-    return evaluate(grouping.getExpression());
+    return evaluate(expression.getChildren().get(0));
   }
   case UNARY: {
-    UnaryExpression &unary =
-        dynamic_cast<UnaryExpression &>(const_cast<Expression &>(expression));
-    Value right = evaluate(unary.getRight());
-    std::string op = unary.getOp().getValue();
+    Value right = evaluate(expression.getChildren().get(0));
+    std::string op = expression.getToken().getValue();
 
     if (op == "-") {
       return -right;
@@ -95,11 +91,9 @@ Value Interpreter::evaluate(Expression expression) {
     return right;
   }
   case BINARY: {
-    BinaryExpression &binary =
-        dynamic_cast<BinaryExpression &>(const_cast<Expression &>(expression));
-    Value left = evaluate(binary.getLeft());
-    Value right = evaluate(binary.getRight());
-    std::string op = binary.getOp().getValue();
+    Value left = evaluate(expression.getChildren().get(0));
+    Value right = evaluate(expression.getChildren().get(1));
+    std::string op = expression.getToken().getValue();
 
     if (op == "+") {
       return left + right;
@@ -142,13 +136,9 @@ Value Interpreter::evaluate(Expression expression) {
     throw std::runtime_error("Unknown binary operator: " + op);
   }
   case CALL: {
-    CallExpression &call =
-        dynamic_cast<CallExpression &>(const_cast<Expression &>(expression));
     return Value("[Function Call]");
   }
   case GET: {
-    GetExpression &getExpr =
-        dynamic_cast<GetExpression &>(const_cast<Expression &>(expression));
     return Value("[Get Property]");
   }
   case EMPTY_EXPR:

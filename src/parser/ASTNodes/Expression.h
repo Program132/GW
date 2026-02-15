@@ -21,15 +21,16 @@ class Expression {
 protected:
   ExpressionType type;
   Token token;
+  List<Expression> children;
 
 public:
   Expression();
   Expression(ExpressionType type);
   Expression(ExpressionType type, Token token);
-  virtual ~Expression() = default;
 
   ExpressionType getType() const;
   Token getToken() const;
+  List<Expression> getChildren() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const Expression &expression);
@@ -41,11 +42,6 @@ public:
 };
 
 class BinaryExpression : public Expression {
-private:
-  Expression left;
-  Token op;
-  Expression right;
-
 public:
   BinaryExpression(Expression left, Token op, Expression right);
 
@@ -58,10 +54,6 @@ public:
 };
 
 class UnaryExpression : public Expression {
-private:
-  Token op;
-  Expression right;
-
 public:
   UnaryExpression(Token op, Expression right);
 
@@ -73,9 +65,6 @@ public:
 };
 
 class LiteralExpression : public Expression {
-private:
-  Token value;
-
 public:
   LiteralExpression(Token value);
 
@@ -86,9 +75,6 @@ public:
 };
 
 class GroupingExpression : public Expression {
-private:
-  Expression expression;
-
 public:
   GroupingExpression(Expression expression);
 
@@ -99,9 +85,6 @@ public:
 };
 
 class VariableExpression : public Expression {
-private:
-  Token name;
-
 public:
   VariableExpression(Token name);
 
@@ -112,10 +95,6 @@ public:
 };
 
 class AssignExpression : public Expression {
-private:
-  Token name;
-  Expression value;
-
 public:
   AssignExpression(Token name, Expression value);
 
@@ -127,11 +106,6 @@ public:
 };
 
 class CallExpression : public Expression {
-private:
-  Expression callee;
-  Token paren;
-  List<Expression> arguments;
-
 public:
   CallExpression(Expression callee, Token paren, List<Expression> arguments);
 
@@ -144,10 +118,6 @@ public:
 };
 
 class GetExpression : public Expression {
-private:
-  Expression object;
-  Token name;
-
 public:
   GetExpression(Expression object, Token name);
 
@@ -159,11 +129,6 @@ public:
 };
 
 class SetExpression : public Expression {
-private:
-  Expression object;
-  Token name;
-  Expression value;
-
 public:
   SetExpression(Expression object, Token name, Expression value);
 
