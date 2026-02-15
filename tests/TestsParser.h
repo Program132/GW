@@ -2,6 +2,7 @@
 #define TESTS_PARSER_H
 
 void testParserExpressions();
+void testParserVariables();
 void testParserStatements();
 void testParserPrecedence();
 

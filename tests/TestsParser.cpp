@@ -53,6 +53,40 @@ void testParserExpressions() {
   }
 }
 
+void testParserVariables() {
+  // Variable Access
+  {
+    Lexer lex("x y_123");
+    lex.lex();
+    Parser p(lex.getTokens());
+    GW_ASSERT(p.getExpression().getType() == ExpressionType::VARIABLE);
+    GW_ASSERT(p.getExpression().getType() == ExpressionType::VARIABLE);
+  }
+
+  // Variable Declaration
+  {
+    Lexer lex("var x = 10; var y;");
+    lex.lex();
+    Parser p(lex.getTokens());
+    p.parse();
+    List<Statement> stats = p.getStatements();
+    GW_ASSERT(stats.size() == 2);
+    GW_ASSERT(stats.get(0).getType() == StatementType::VAR_DECLARATION);
+    GW_ASSERT(stats.get(1).getType() == StatementType::VAR_DECLARATION);
+  }
+
+  // Variable Assignment
+  {
+    Lexer lex("x = 20;");
+    lex.lex();
+    Parser p(lex.getTokens());
+    p.parse();
+    List<Statement> stats = p.getStatements();
+    GW_ASSERT(stats.size() == 1);
+    GW_ASSERT(stats.get(0).getType() == StatementType::EXPRESSION_STATEMENT);
+  }
+}
+
 void testParserStatements() {
   // Multiple statements
   {

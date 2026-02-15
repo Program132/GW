@@ -2,5 +2,6 @@
 #define TESTS_INTERPRETER_H
 
 void testInterpreterPrint();
+void testInterpreterVariables();
 
 #endif

@@ -283,3 +283,32 @@ void testInterpreterPrint() {
     GW_ASSERT(output == "Test\n123\nDone\n");
   }
 }
+
+void testInterpreterVariables() {
+  {
+    std::string output = captureOutput("var x = 10; print(x);");
+    GW_ASSERT(output == "10");
+  }
+
+  {
+    std::string output = captureOutput("var x = 5; x = 15; print(x);");
+    GW_ASSERT(output == "15");
+  }
+
+  {
+    std::string output =
+        captureOutput("var a = 10; var b = 20; var c = a + b; print(c);");
+    GW_ASSERT(output == "30");
+  }
+
+  {
+    std::string output =
+        captureOutput("var name = \"A\"; print(\"Hello \" + name);");
+    GW_ASSERT(output == "Hello A");
+  }
+
+  {
+    std::string output = captureOutput("var x = 10; x = 20; print(x);");
+    GW_ASSERT(output == "20");
+  }
+}
