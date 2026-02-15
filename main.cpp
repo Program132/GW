@@ -62,6 +62,7 @@ int main(int argc, char *argv[]) {
   /* =================== TESTS =================== */
   /* =================== Parser ================== */
   testParserExpressions();
+  testParserVariables();
   testParserStatements();
   testParserPrecedence();
   /* ============================================= */
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]) {
   /* =================== TESTS =================== */
   /* =================== Interpreter ============= */
   testInterpreterPrint();
+  testInterpreterVariables();
   /* ============================================= */
   /* ============================================= */
 
