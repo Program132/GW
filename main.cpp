@@ -1,4 +1,5 @@
 #include "tests/TestsExpression.h"
+#include "tests/TestsInterpreter.h"
 #include "tests/TestsLexer.h"
 #include "tests/TestsList.h"
 #include "tests/TestsParser.h"
@@ -56,6 +57,12 @@ int main() {
   testParserExpressions();
   testParserStatements();
   testParserPrecedence();
+  /* ============================================= */
+  /* ============================================= */
+
+  /* =================== TESTS =================== */
+  /* =================== Interpreter ============= */
+  testInterpreterPrint();
   /* ============================================= */
   /* ============================================= */
 
