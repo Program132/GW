@@ -56,6 +56,27 @@ void Interpreter::execute(Statement statement) {
     std::cout << evaluation.toString() << std::endl;
     break;
   }
+  case VAR_DECLARATION: {
+    std::string varName = statement.getToken().getValue();
+    Value value; // Null
+
+    if (statement.getExpression().getType() != EMPTY_EXPR) {
+      value = evaluate(statement.getExpression());
+    }
+
+    if (environment.variableExist(varName)) {
+      std::cerr << "[ERROR] Variable '" << varName << "' already defined"
+                << std::endl;
+      return;
+    }
+
+    environment.addVariable(varName, value, "Unknown");
+    break;
+  }
+  case EXPRESSION_STATEMENT: {
+    evaluate(statement.getExpression());
+    break;
+  }
   default:
     break;
   }
@@ -68,7 +89,21 @@ Value Interpreter::evaluate(Expression expression) {
   }
   case VARIABLE: {
     std::string varName = expression.getToken().getValue();
-    return Value(std::string("[Variable: ") + varName + "]");
+    if (!environment.variableExist(varName)) {
+      throw std::runtime_error("Undefined variable '" + varName + "'");
+    }
+    return environment.getVariableValue(varName);
+  }
+  case ASSIGN: {
+    std::string varName = expression.getToken().getValue();
+    Value value = evaluate(expression.getChildren().get(0));
+
+    if (!environment.variableExist(varName)) {
+      throw std::runtime_error("Undefined variable '" + varName + "'");
+    }
+
+    environment.updateVariable(varName, value);
+    return value;
   }
   case GROUPING: {
     return evaluate(expression.getChildren().get(0));
