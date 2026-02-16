@@ -1,15 +1,18 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include "../Interpreter/Function.h"
 #include "../value/Value.h"
 #include <map>
 #include <string>
+
 
 class Environment {
 private:
   Environment *parent;
   std::map<std::string, Value> variables;
   std::map<std::string, std::string> variableTypes;
+  std::map<std::string, Function> functions;
 
 public:
   Environment() : parent(nullptr) {}
@@ -63,6 +66,30 @@ public:
     if (parent != nullptr) {
       parent->updateVariable(name, value, type);
     }
+  }
+
+  void addFunction(const std::string &name, const Function &func) {
+    functions[name] = func;
+  }
+
+  bool functionExist(const std::string &name) {
+    if (functions.find(name) != functions.end()) {
+      return true;
+    }
+    if (parent != nullptr) {
+      return parent->functionExist(name);
+    }
+    return false;
+  }
+
+  Function getFunction(const std::string &name) {
+    if (functions.find(name) != functions.end()) {
+      return functions[name];
+    }
+    if (parent != nullptr) {
+      return parent->getFunction(name);
+    }
+    return Function();
   }
 };
 
