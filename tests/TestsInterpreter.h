@@ -3,5 +3,6 @@
 
 void testInterpreterPrint();
 void testInterpreterVariables();
+void testInterpreterFunctions();
 
 #endif

@@ -3,6 +3,7 @@
 
 void testParserExpressions();
 void testParserVariables();
+void testParserFunctions();
 void testParserStatements();
 void testParserPrecedence();
 

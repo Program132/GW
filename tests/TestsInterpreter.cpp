@@ -312,3 +312,31 @@ void testInterpreterVariables() {
     GW_ASSERT(output == "20");
   }
 }
+
+void testInterpreterFunctions() {
+  {
+    std::cout << 1 << std::endl;
+    std::string output = captureOutput(
+        "func add(a: Integer, b: Integer) -> Integer { return a + b; } "
+        "print(add(5, 10));");
+    GW_ASSERT(output == "15");
+  }
+
+  {
+    std::cout << 2 << std::endl;
+    std::string output = captureOutput(
+        "func sayHello(name: String) -> String { print(\"Hello \" "
+        "+ name); return \"Done\"; } "
+        "sayHello(\"GW\");");
+    GW_ASSERT(output == "Hello GW");
+  }
+
+  {
+    std::cout << 3 << std::endl;
+    std::string output =
+        captureOutput("func square(x: Integer) -> Integer { return x * x; } "
+                      "var result = square(4); "
+                      "print(result);");
+    GW_ASSERT(output == "16");
+  }
+}

@@ -9,10 +9,10 @@ void testParserExpressions() {
     Lexer lex("42 \"hello\" true false");
     lex.lex();
     Parser p(lex.getTokens());
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::LITERAL);
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::LITERAL);
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::LITERAL);
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::LITERAL);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::LITERAL);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::LITERAL);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::LITERAL);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::LITERAL);
   }
 
   // Unary
@@ -20,8 +20,8 @@ void testParserExpressions() {
     Lexer lex("-5 !true");
     lex.lex();
     Parser p(lex.getTokens());
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::UNARY);
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::UNARY);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::UNARY);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::UNARY);
   }
 
   // Binary Arithmetic
@@ -29,8 +29,8 @@ void testParserExpressions() {
     Lexer lex("1 + 2 * 3 / 4 - 5 % 6");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
   }
 
   // Binary Logic & Comparison
@@ -38,8 +38,8 @@ void testParserExpressions() {
     Lexer lex("a < b & c == d | e >= f");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
   }
 
   // Grouping
@@ -47,9 +47,9 @@ void testParserExpressions() {
     Lexer lex("(1 + 2) * 3");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
-    GW_ASSERT(expr.getToken().getValue() == "*");
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
+    GW_ASSERT(expr->getToken().getValue() == "*");
   }
 }
 
@@ -59,8 +59,8 @@ void testParserVariables() {
     Lexer lex("x y_123");
     lex.lex();
     Parser p(lex.getTokens());
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::VARIABLE);
-    GW_ASSERT(p.getExpression().getType() == ExpressionType::VARIABLE);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::VARIABLE);
+    GW_ASSERT(p.getExpression()->getType() == ExpressionType::VARIABLE);
   }
 
   // Variable Declaration
@@ -69,10 +69,10 @@ void testParserVariables() {
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();
-    List<Statement> stats = p.getStatements();
+    List<Statement *> stats = p.getStatements();
     GW_ASSERT(stats.size() == 2);
-    GW_ASSERT(stats.get(0).getType() == StatementType::VAR_DECLARATION);
-    GW_ASSERT(stats.get(1).getType() == StatementType::VAR_DECLARATION);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::VAR_DECLARATION);
+    GW_ASSERT(stats.get(1)->getType() == StatementType::VAR_DECLARATION);
   }
 
   // Variable Assignment
@@ -81,9 +81,9 @@ void testParserVariables() {
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();
-    List<Statement> stats = p.getStatements();
+    List<Statement *> stats = p.getStatements();
     GW_ASSERT(stats.size() == 1);
-    GW_ASSERT(stats.get(0).getType() == StatementType::EXPRESSION_STATEMENT);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::EXPRESSION_STATEMENT);
   }
 }
 
@@ -94,12 +94,12 @@ void testParserStatements() {
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();
-    List<Statement> stats = p.getStatements();
+    List<Statement *> stats = p.getStatements();
     GW_ASSERT(stats.size() == 4);
-    GW_ASSERT(stats.get(0).getType() == StatementType::EXPRESSION_STATEMENT);
-    GW_ASSERT(stats.get(1).getType() == StatementType::EXPRESSION_STATEMENT);
-    GW_ASSERT(stats.get(2).getType() == StatementType::PRINT_STATEMENT);
-    GW_ASSERT(stats.get(3).getType() == StatementType::PRINTLN_STATEMENT);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::EXPRESSION_STATEMENT);
+    GW_ASSERT(stats.get(1)->getType() == StatementType::EXPRESSION_STATEMENT);
+    GW_ASSERT(stats.get(2)->getType() == StatementType::PRINT_STATEMENT);
+    GW_ASSERT(stats.get(3)->getType() == StatementType::PRINTLN_STATEMENT);
   }
 
   // Empty print/println
@@ -108,7 +108,7 @@ void testParserStatements() {
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();
-    List<Statement> stats = p.getStatements();
+    List<Statement *> stats = p.getStatements();
     GW_ASSERT(stats.size() == 2);
   }
 }
@@ -119,9 +119,9 @@ void testParserPrecedence() {
     Lexer lex("1 + 2 * 3");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
-    GW_ASSERT(expr.getToken().getValue() == "+"); // + should be root
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
+    GW_ASSERT(expr->getToken().getValue() == "+"); // + should be root
   }
 
   // Comparison before logical
@@ -129,9 +129,9 @@ void testParserPrecedence() {
     Lexer lex("a < b & c > d");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
-    GW_ASSERT(expr.getToken().getValue() == "&"); // & should be root
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
+    GW_ASSERT(expr->getToken().getValue() == "&"); // & should be root
   }
 
   // Logical And before Logical Or
@@ -139,9 +139,9 @@ void testParserPrecedence() {
     Lexer lex("a | b & c");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::BINARY);
-    GW_ASSERT(expr.getToken().getValue() == "|"); // | should be root
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::BINARY);
+    GW_ASSERT(expr->getToken().getValue() == "|"); // | should be root
   }
 
   // Assignment is right-associative and lowest precedence
@@ -149,7 +149,42 @@ void testParserPrecedence() {
     Lexer lex("a = b = 5");
     lex.lex();
     Parser p(lex.getTokens());
-    Expression expr = p.getExpression();
-    GW_ASSERT(expr.getType() == ExpressionType::ASSIGN);
+    Expression *expr = p.getExpression();
+    GW_ASSERT(expr->getType() == ExpressionType::ASSIGN);
+  }
+}
+
+void testParserFunctions() {
+  // Function Declaration
+  {
+    Lexer lex("func add(a: Integer, b: Integer) -> Integer { return a + b; }");
+    lex.lex();
+    Parser p(lex.getTokens());
+    p.parse();
+    List<Statement *> stats = p.getStatements();
+    GW_ASSERT(stats.size() == 1);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::FUNCTION_DECLARATION);
+  }
+
+  // Function Call
+  {
+    Lexer lex("add(5, 10);");
+    lex.lex();
+    Parser p(lex.getTokens());
+    p.parse();
+    List<Statement *> stats = p.getStatements();
+    GW_ASSERT(stats.size() == 1);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::EXPRESSION_STATEMENT);
+  }
+
+  // Return Statement
+  {
+    Lexer lex("return 42;");
+    lex.lex();
+    Parser p(lex.getTokens());
+    p.parse();
+    List<Statement *> stats = p.getStatements();
+    GW_ASSERT(stats.size() == 1);
+    GW_ASSERT(stats.get(0)->getType() == StatementType::RETURN);
   }
 }

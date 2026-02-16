@@ -25,54 +25,62 @@ void testExpression() {
   GW_ASSERT(varX.getName().getValue() == "x");
 
   // Binary Expression: x + 42
-  BinaryExpression binaryAdd(varX, plusToken, literal42);
+  BinaryExpression binaryAdd(new VariableExpression(nameX), plusToken,
+                             new LiteralExpression(number42));
   GW_ASSERT(binaryAdd.getOp().getValue() == "+");
-  GW_ASSERT(binaryAdd.getLeft().getType() == ExpressionType::VARIABLE);
+  GW_ASSERT(binaryAdd.getLeft()->getType() == ExpressionType::VARIABLE);
 
   // Complex Binary: (x + 42) * 10
-  BinaryExpression complexBinary(binaryAdd, starToken,
-                                 LiteralExpression(number10));
+  BinaryExpression complexBinary(
+      new BinaryExpression(new VariableExpression(nameX), plusToken,
+                           new LiteralExpression(number42)),
+      starToken, new LiteralExpression(number10));
   GW_ASSERT(complexBinary.getOp().getValue() == "*");
-  GW_ASSERT(complexBinary.getLeft().getType() == ExpressionType::BINARY);
+  GW_ASSERT(complexBinary.getLeft()->getType() == ExpressionType::BINARY);
 
   // Unary Expression: -x
-  UnaryExpression unary(Token(TokenType::MATH_OPERATOR, "-", 1), varX);
+  UnaryExpression unary(Token(TokenType::MATH_OPERATOR, "-", 1),
+                        new VariableExpression(nameX));
   GW_ASSERT(unary.getType() == ExpressionType::UNARY);
   GW_ASSERT(unary.getOp().getValue() == "-");
 
   // Grouping Expression: (x)
-  GroupingExpression grouping(varX);
-  GW_ASSERT(grouping.getExpression().getType() == ExpressionType::VARIABLE);
+  GroupingExpression grouping(new VariableExpression(nameX));
+  GW_ASSERT(grouping.getExpression()->getType() == ExpressionType::VARIABLE);
 
   // Assign Expression: x = 10
-  AssignExpression assign(nameX, LiteralExpression(number10));
+  AssignExpression assign(nameX, new LiteralExpression(number10));
   GW_ASSERT(assign.getName().getValue() == "x");
-  GW_ASSERT(assign.getValue().getType() == ExpressionType::LITERAL);
+  GW_ASSERT(assign.getValue()->getType() == ExpressionType::LITERAL);
 
   // Call Expression: x(10, 42)
-  List<Expression> args;
-  args.append(LiteralExpression(number10));
-  args.append(literal42);
-  CallExpression call(varX, Token(TokenType::OPERATOR, "(", 1), args);
+  List<Expression *> args;
+  args.append(new LiteralExpression(number10));
+  args.append(new LiteralExpression(number42));
+  CallExpression call(new VariableExpression(nameX),
+                      Token(TokenType::OPERATOR, "(", 1), args);
   GW_ASSERT(call.getArguments().size() == 2);
-  GW_ASSERT(call.getArguments().get(1).getType() == ExpressionType::LITERAL);
+  GW_ASSERT(call.getArguments().get(1)->getType() == ExpressionType::LITERAL);
 
   // Get Expression: x.y
-  GetExpression getExpr(varX, nameY);
+  GetExpression getExpr(new VariableExpression(nameX), nameY);
   GW_ASSERT(getExpr.getType() == ExpressionType::GET);
   GW_ASSERT(getExpr.getName().getValue() == "y");
 
   // Set Expression: x.y = 42
-  SetExpression setExpr(varX, nameY, literal42);
+  SetExpression setExpr(new VariableExpression(nameX), nameY,
+                        new LiteralExpression(number42));
   GW_ASSERT(setExpr.getType() == ExpressionType::SET);
   GW_ASSERT(setExpr.getName().getValue() == "y");
-  GW_ASSERT(setExpr.getValue().getType() == ExpressionType::LITERAL);
+  GW_ASSERT(setExpr.getValue()->getType() == ExpressionType::LITERAL);
 
   // Nested Set: x.y = z.a
-  VariableExpression varZ(Token(TokenType::IDENTIFIER, "z", 1));
-  GetExpression getZA(varZ, Token(TokenType::IDENTIFIER, "a", 1));
-  SetExpression nestedSet(varX, nameY, getZA);
-  GW_ASSERT(nestedSet.getValue().getType() == ExpressionType::GET);
+  VariableExpression *varZ =
+      new VariableExpression(Token(TokenType::IDENTIFIER, "z", 1));
+  GetExpression *getZA =
+      new GetExpression(varZ, Token(TokenType::IDENTIFIER, "a", 1));
+  SetExpression nestedSet(new VariableExpression(nameX), nameY, getZA);
+  GW_ASSERT(nestedSet.getValue()->getType() == ExpressionType::GET);
 
   // Empty Expression (The one we added to fix the bug!)
   Expression empty;
