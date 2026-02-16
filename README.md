@@ -73,6 +73,7 @@ Dive into the details and start building with GW:
 | 📦 **[Variable](doc/variable.md)** | Learn about variables management (declaration, assignment, reassignment). |
 | ⚙️ **[Function](doc/function.md)** | Learn about function management (declaration, call, return). |
 | 🛣️ **[Conditions](doc/conditions.md)** | Learn about conditions management (if & else). |
+| 🔄 **[Loops](doc/loops.md)** | Learn about loops management (while & for). |
 
 ## Compile & Run
 
