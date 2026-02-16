@@ -14,6 +14,7 @@ private:
   std::map<std::string, std::string> variableTypes;
   std::map<std::string, Function> functions;
   std::map<std::string, StructDeclarationStatement *> structs;
+  std::map<std::string, ClassDeclarationStatement *> classes;
 
 public:
   Environment() : parent(nullptr) {}
@@ -39,6 +40,30 @@ public:
     }
     if (parent != nullptr) {
       return parent->getStruct(name);
+    }
+    return nullptr;
+  }
+
+  void addClass(const std::string &name, ClassDeclarationStatement *stmt) {
+    classes[name] = stmt;
+  }
+
+  bool classExist(const std::string &name) {
+    if (classes.find(name) != classes.end()) {
+      return true;
+    }
+    if (parent != nullptr) {
+      return parent->classExist(name);
+    }
+    return false;
+  }
+
+  ClassDeclarationStatement *getClass(const std::string &name) {
+    if (classes.find(name) != classes.end()) {
+      return classes[name];
+    }
+    if (parent != nullptr) {
+      return parent->getClass(name);
     }
     return nullptr;
   }
