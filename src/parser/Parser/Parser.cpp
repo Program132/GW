@@ -305,6 +305,8 @@ Statement *Parser::statement() {
     return forStatement();
   } else if (checkIdentifier("struct")) {
     return structDeclarationStatement();
+  } else if (checkIdentifier("class")) {
+    return classDeclarationStatement();
   } else {
     return expressionStatement();
   }
@@ -522,4 +524,137 @@ StructDeclarationStatement *Parser::structDeclarationStatement() {
   this->consume(TokenType::OPERATOR, "}", "Expected '}' after struct body");
 
   return new StructDeclarationStatement(name, fields);
+}
+
+ClassDeclarationStatement *Parser::classDeclarationStatement() {
+  this->advance(); // consume 'class'
+
+  if (!this->checkType(TokenType::IDENTIFIER)) {
+    throw std::runtime_error("Expected identifier line " +
+                             std::to_string(peek().getLine()));
+  }
+  Token name = this->advance();
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after class name");
+
+  List<List<Token>> fields;
+  List<FunctionDeclarationStatement *> methods;
+  List<ConstructorDeclarationStatement *> constructors;
+  List<OperatorDeclarationStatement *> operators;
+
+  while (!this->checkOperator("}") && !this->isAtEnd()) {
+    if (this->checkIdentifier("func")) {
+      methods.append(this->functionDeclarationStatement());
+    } else if (this->checkIdentifier("constructor")) {
+      constructors.append(this->constructorDeclarationStatement());
+    } else if (this->checkIdentifier("operator")) {
+      operators.append(this->operatorDeclarationStatement());
+    } else {
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected field or method declaration line " +
+                                 std::to_string(peek().getLine()));
+      }
+      Token fieldName = this->advance();
+      this->consume(TokenType::OPERATOR, ":", "Expected ':' after field name");
+
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected type after field name");
+      }
+      Token typeToken = this->advance();
+
+      List<Token> field;
+      field.append(typeToken);
+      field.append(fieldName);
+      fields.append(field);
+
+      if (this->checkOperator(",")) {
+        this->advance();
+      }
+    }
+  }
+
+  this->consume(TokenType::OPERATOR, "}", "Expected '}' after class body");
+
+  return new ClassDeclarationStatement(name, fields, methods, constructors,
+                                       operators);
+}
+
+ConstructorDeclarationStatement *Parser::constructorDeclarationStatement() {
+  this->advance(); // consume 'constructor'
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after constructor");
+
+  List<List<Token>> parameters;
+  if (!this->checkOperator(")")) {
+    while (true) {
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected parameter name line " +
+                                 std::to_string(peek().getLine()));
+      }
+      Token paramName = this->advance();
+      this->consume(TokenType::OPERATOR, ":",
+                    "Expected ':' after parameter name");
+
+      Token paramTypeToken = this->advance();
+      List<Token> parameter;
+      parameter.append(paramTypeToken);
+      parameter.append(paramName);
+      parameters.append(parameter);
+
+      if (!this->matchOperator(",")) {
+        break;
+      }
+    }
+  }
+
+  this->consume(TokenType::OPERATOR, ")",
+                "Expected ')' after constructor parameters");
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after constructor");
+
+  BlockStatement *body = this->blockStatement();
+  return new ConstructorDeclarationStatement(parameters, body);
+}
+
+OperatorDeclarationStatement *Parser::operatorDeclarationStatement() {
+  this->advance();            // consume 'operator'
+  Token op = this->advance(); // consume operator
+
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after operator");
+
+  List<List<Token>> parameters;
+  if (!this->checkOperator(")")) {
+    while (true) {
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected parameter name line " +
+                                 std::to_string(peek().getLine()));
+      }
+      Token paramName = this->advance();
+      this->consume(TokenType::OPERATOR, ":",
+                    "Expected ':' after parameter name");
+
+      Token paramTypeToken = this->advance();
+      List<Token> parameter;
+      parameter.append(paramTypeToken);
+      parameter.append(paramName);
+      parameters.append(parameter);
+
+      if (!this->matchOperator(",")) {
+        break;
+      }
+    }
+  }
+
+  this->consume(TokenType::OPERATOR, ")",
+                "Expected ')' after operator parameters");
+
+  DataTypes returnType = DataTypes::Null;
+  if (this->matchOperator("->")) {
+    Token returnTypeToken = this->advance();
+    returnType = toDataTypes(returnTypeToken);
+  }
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after operator");
+
+  BlockStatement *body = this->blockStatement();
+
+  return new OperatorDeclarationStatement(op, parameters, body, returnType);
 }

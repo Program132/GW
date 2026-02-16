@@ -56,6 +56,9 @@ public:
   WhileStatement *whileStatement();
   ForStatement *forStatement();
   StructDeclarationStatement *structDeclarationStatement();
+  ClassDeclarationStatement *classDeclarationStatement();
+  ConstructorDeclarationStatement *constructorDeclarationStatement();
+  OperatorDeclarationStatement *operatorDeclarationStatement();
 
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
