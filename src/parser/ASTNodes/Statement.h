@@ -184,15 +184,18 @@ public:
   ContinueStatement();
 };
 
+class OperatorDeclarationStatement;
+
 class ConstructorDeclarationStatement : public Statement {
 private:
-  List<Token> params;
+  List<List<Token>> params;
   BlockStatement *body;
 
 public:
-  ConstructorDeclarationStatement(List<Token> params, BlockStatement *body);
+  ConstructorDeclarationStatement(List<List<Token>> params,
+                                  BlockStatement *body);
 
-  List<Token> getParams() const;
+  List<List<Token>> getParams() const;
   BlockStatement *getBody() const;
 };
 
@@ -200,14 +203,22 @@ class ClassDeclarationStatement : public Statement {
 private:
   Token name;
   List<List<Token>> fields;
-  List<FunctionDeclarationStatement> methods;
-  List<ConstructorDeclarationStatement> constructors;
+  List<FunctionDeclarationStatement *> methods;
+  List<ConstructorDeclarationStatement *> constructors;
+  List<OperatorDeclarationStatement *> operators;
 
 public:
-  ClassDeclarationStatement(Token name, List<List<Token>> fields);
+  ClassDeclarationStatement(
+      Token name, List<List<Token>> fields,
+      List<FunctionDeclarationStatement *> methods,
+      List<ConstructorDeclarationStatement *> constructors,
+      List<OperatorDeclarationStatement *> operators);
 
   Token getName() const;
   List<List<Token>> getFields() const;
+  List<FunctionDeclarationStatement *> getMethods() const;
+  List<ConstructorDeclarationStatement *> getConstructors() const;
+  List<OperatorDeclarationStatement *> getOperators() const;
 };
 
 class OperatorDeclarationStatement : public Statement {

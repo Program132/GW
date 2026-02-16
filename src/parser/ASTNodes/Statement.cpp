@@ -198,10 +198,10 @@ BreakStatement::BreakStatement() : Statement(BREAK) {}
 ContinueStatement::ContinueStatement() : Statement(CONTINUE) {}
 
 ConstructorDeclarationStatement::ConstructorDeclarationStatement(
-    List<Token> params, BlockStatement *body)
+    List<List<Token>> params, BlockStatement *body)
     : Statement(CONSTRUCTOR_DECLARATION), params(params), body(body) {}
 
-List<Token> ConstructorDeclarationStatement::getParams() const {
+List<List<Token>> ConstructorDeclarationStatement::getParams() const {
   return params;
 }
 
@@ -209,14 +209,33 @@ BlockStatement *ConstructorDeclarationStatement::getBody() const {
   return body;
 }
 
-ClassDeclarationStatement::ClassDeclarationStatement(Token name,
-                                                     List<List<Token>> fields)
-    : Statement(CLASS_DECLARATION, name), name(name), fields(fields) {}
+ClassDeclarationStatement::ClassDeclarationStatement(
+    Token name, List<List<Token>> fields,
+    List<FunctionDeclarationStatement *> methods,
+    List<ConstructorDeclarationStatement *> constructors,
+    List<OperatorDeclarationStatement *> operators)
+    : Statement(CLASS_DECLARATION, name), name(name), fields(fields),
+      methods(methods), constructors(constructors), operators(operators) {}
 
 Token ClassDeclarationStatement::getName() const { return name; }
 
 List<List<Token>> ClassDeclarationStatement::getFields() const {
   return fields;
+}
+
+List<FunctionDeclarationStatement *>
+ClassDeclarationStatement::getMethods() const {
+  return methods;
+}
+
+List<ConstructorDeclarationStatement *>
+ClassDeclarationStatement::getConstructors() const {
+  return constructors;
+}
+
+List<OperatorDeclarationStatement *>
+ClassDeclarationStatement::getOperators() const {
+  return operators;
 }
 
 OperatorDeclarationStatement::OperatorDeclarationStatement(
