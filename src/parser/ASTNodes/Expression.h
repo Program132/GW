@@ -21,16 +21,17 @@ class Expression {
 protected:
   ExpressionType type;
   Token token;
-  List<Expression> children;
+  List<Expression *> children;
 
 public:
   Expression();
   Expression(ExpressionType type);
   Expression(ExpressionType type, Token token);
+  virtual ~Expression();
 
   ExpressionType getType() const;
   Token getToken() const;
-  List<Expression> getChildren() const;
+  List<Expression *> getChildren() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const Expression &expression);
@@ -43,11 +44,11 @@ public:
 
 class BinaryExpression : public Expression {
 public:
-  BinaryExpression(Expression left, Token op, Expression right);
+  BinaryExpression(Expression *left, Token op, Expression *right);
 
-  Expression getLeft() const;
+  Expression *getLeft() const;
   Token getOp() const;
-  Expression getRight() const;
+  Expression *getRight() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const BinaryExpression &binaryExpression);
@@ -55,10 +56,10 @@ public:
 
 class UnaryExpression : public Expression {
 public:
-  UnaryExpression(Token op, Expression right);
+  UnaryExpression(Token op, Expression *right);
 
   Token getOp() const;
-  Expression getRight() const;
+  Expression *getRight() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const UnaryExpression &unaryExpression);
@@ -76,9 +77,9 @@ public:
 
 class GroupingExpression : public Expression {
 public:
-  GroupingExpression(Expression expression);
+  GroupingExpression(Expression *expression);
 
-  Expression getExpression() const;
+  Expression *getExpression() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const GroupingExpression &groupingExpression);
@@ -96,10 +97,10 @@ public:
 
 class AssignExpression : public Expression {
 public:
-  AssignExpression(Token name, Expression value);
+  AssignExpression(Token name, Expression *value);
 
   Token getName() const;
-  Expression getValue() const;
+  Expression *getValue() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const AssignExpression &assignExpression);
@@ -107,11 +108,11 @@ public:
 
 class CallExpression : public Expression {
 public:
-  CallExpression(Expression callee, Token paren, List<Expression> arguments);
+  CallExpression(Expression *callee, Token paren, List<Expression *> arguments);
 
-  Expression getCallee() const;
+  Expression *getCallee() const;
   Token getParen() const;
-  List<Expression> getArguments() const;
+  List<Expression *> getArguments() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const CallExpression &callExpression);
@@ -119,9 +120,9 @@ public:
 
 class GetExpression : public Expression {
 public:
-  GetExpression(Expression object, Token name);
+  GetExpression(Expression *object, Token name);
 
-  Expression getObject() const;
+  Expression *getObject() const;
   Token getName() const;
 
   friend std::ostream &operator<<(std::ostream &os,
@@ -130,11 +131,11 @@ public:
 
 class SetExpression : public Expression {
 public:
-  SetExpression(Expression object, Token name, Expression value);
+  SetExpression(Expression *object, Token name, Expression *value);
 
-  Expression getObject() const;
+  Expression *getObject() const;
   Token getName() const;
-  Expression getValue() const;
+  Expression *getValue() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const SetExpression &setExpression);
