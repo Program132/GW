@@ -84,8 +84,12 @@ void testStatement() {
   GW_ASSERT(structDecl.getName().getValue() == "Person");
 
   // ClassDeclarationStatement
+  List<FunctionDeclarationStatement *> emptyMethods;
+  List<ConstructorDeclarationStatement *> emptyConstructors;
+  List<OperatorDeclarationStatement *> emptyOperators;
   ClassDeclarationStatement classDecl(
-      Token(TokenType::IDENTIFIER, "MyClass", 1), fields);
+      Token(TokenType::IDENTIFIER, "MyClass", 1), fields, emptyMethods,
+      emptyConstructors, emptyOperators);
   GW_ASSERT(classDecl.getName().getValue() == "MyClass");
 
   // Operators, Break, Continue
