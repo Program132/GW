@@ -4,5 +4,6 @@
 void testInterpreterPrint();
 void testInterpreterVariables();
 void testInterpreterFunctions();
+void testInterpreterLoops();
 
 #endif

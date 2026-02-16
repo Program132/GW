@@ -315,7 +315,6 @@ void testInterpreterVariables() {
 
 void testInterpreterFunctions() {
   {
-    std::cout << 1 << std::endl;
     std::string output = captureOutput(
         "func add(a: Integer, b: Integer) -> Integer { return a + b; } "
         "print(add(5, 10));");
@@ -323,7 +322,6 @@ void testInterpreterFunctions() {
   }
 
   {
-    std::cout << 2 << std::endl;
     std::string output = captureOutput(
         "func sayHello(name: String) -> String { print(\"Hello \" "
         "+ name); return \"Done\"; } "
@@ -332,11 +330,56 @@ void testInterpreterFunctions() {
   }
 
   {
-    std::cout << 3 << std::endl;
     std::string output =
         captureOutput("func square(x: Integer) -> Integer { return x * x; } "
                       "var result = square(4); "
                       "print(result);");
     GW_ASSERT(output == "16");
+  }
+}
+
+void testInterpreterLoops() {
+  {
+    std::string output = captureOutput("var res = \"\"; "
+                                       "var i = 0; "
+                                       "while (i < 5) { "
+                                       "i = i + 1; "
+                                       "if (i == 3) { continue; } "
+                                       "res = res + i; "
+                                       "} "
+                                       "print(res);");
+    GW_ASSERT(output == "1245");
+  }
+
+  {
+    std::string output = captureOutput("var res = \"\"; "
+                                       "var i = 0; "
+                                       "while (i < 5) { "
+                                       "i = i + 1; "
+                                       "if (i == 3) { break; } "
+                                       "res = res + i; "
+                                       "} "
+                                       "print(res);");
+    GW_ASSERT(output == "12");
+  }
+
+  {
+    std::string output = captureOutput("var res = \"\"; "
+                                       "for (var i = 1; i <= 5; i = i + 1) { "
+                                       "if (i == 3) { continue; } "
+                                       "res = res + i; "
+                                       "} "
+                                       "print(res);");
+    GW_ASSERT(output == "1245");
+  }
+
+  {
+    std::string output = captureOutput("var res = \"\"; "
+                                       "for (var i = 1; i <= 5; i = i + 1) { "
+                                       "if (i == 3) { break; } "
+                                       "res = res + i; "
+                                       "} "
+                                       "print(res);");
+    GW_ASSERT(output == "12");
   }
 }
