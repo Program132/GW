@@ -51,6 +51,8 @@ public:
   VarDeclarationStatement *varDeclarationStatement();
   FunctionDeclarationStatement *functionDeclarationStatement();
   ReturnStatement *returnStatement();
+  BreakStatement *breakStatement();
+  ContinueStatement *continueStatement();
   BlockStatement *blockStatement();
   IfStatement *ifStatement();
   WhileStatement *whileStatement();

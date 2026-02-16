@@ -297,6 +297,10 @@ Statement *Parser::statement() {
     return functionDeclarationStatement();
   } else if (checkIdentifier("return")) {
     return returnStatement();
+  } else if (checkIdentifier("break")) {
+    return breakStatement();
+  } else if (checkIdentifier("continue")) {
+    return continueStatement();
   } else if (checkIdentifier("if")) {
     return ifStatement();
   } else if (checkIdentifier("while")) {
@@ -410,6 +414,18 @@ ReturnStatement *Parser::returnStatement() {
   }
   this->consume(TokenType::OPERATOR, ";", "Expected ';' after return value");
   return new ReturnStatement(value);
+}
+
+BreakStatement *Parser::breakStatement() {
+  this->advance(); // consume 'break'
+  this->consume(TokenType::OPERATOR, ";", "Expected ';' after break");
+  return new BreakStatement();
+}
+
+ContinueStatement *Parser::continueStatement() {
+  this->advance(); // consume 'continue'
+  this->consume(TokenType::OPERATOR, ";", "Expected ';' after continue");
+  return new ContinueStatement();
 }
 
 BlockStatement *Parser::blockStatement() {
