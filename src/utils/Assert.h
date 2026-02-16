@@ -2,11 +2,12 @@
 #define GW_ASSERT_H
 
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 #define GW_ASSERT(condition)                                                   \
   if (!(condition)) {                                                          \
-    std::cerr << "Assertion failed: " << #condition << std::endl;              \
-    std::abort();                                                              \
+    throw std::runtime_error("Assertion failed: " #condition);                 \
   }
 
 #endif // GW_ASSERT_H
