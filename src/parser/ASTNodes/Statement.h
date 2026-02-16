@@ -28,29 +28,31 @@ class Statement {
 protected:
   StatementType type;
   Token token;
-  Expression expression;
+  Expression *expression;
 
 public:
   Statement();
   Statement(StatementType type);
   Statement(StatementType type, Token token);
-  Statement(StatementType type, Expression expression);
-  Statement(StatementType type, Token token, Expression expression);
+  Statement(StatementType type, Expression *expression);
+  Statement(StatementType type, Token token, Expression *expression);
+  virtual ~Statement();
+
   StatementType getType() const;
   Token getToken() const;
-  Expression getExpression() const;
+  Expression *getExpression() const;
 
   friend std::ostream &operator<<(std::ostream &os, const Statement &statement);
 };
 
 class ExpressionStatement : public Statement {
 public:
-  ExpressionStatement(Expression expression);
+  ExpressionStatement(Expression *expression);
 };
 
 class PrintStatement : public Statement {
 public:
-  PrintStatement(Expression expression);
+  PrintStatement(Expression *expression);
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const PrintStatement &printStatement);
@@ -58,7 +60,7 @@ public:
 
 class PrintlnStatement : public Statement {
 public:
-  PrintlnStatement(Expression expression);
+  PrintlnStatement(Expression *expression);
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const PrintlnStatement &printlnStatement);
@@ -67,68 +69,69 @@ public:
 class VarDeclarationStatement : public Statement {
 private:
   Token name;
-  Expression initializer;
 
 public:
   VarDeclarationStatement(Token name);
-  VarDeclarationStatement(Token name, Expression initializer);
+  VarDeclarationStatement(Token name, Expression *initializer);
 
   Token getName() const;
-  Expression getInitializer() const;
+  Expression *getInitializer() const;
 };
 
 class BlockStatement : public Statement {
 private:
-  List<Statement> statements;
+  List<Statement *> statements;
 
 public:
   BlockStatement() = default;
-  BlockStatement(List<Statement> statements);
+  BlockStatement(List<Statement *> statements);
 
-  List<Statement> getStatements() const;
+  List<Statement *> getStatements() const;
 };
 
 class IfStatement : public Statement {
 private:
-  Expression condition;
-  Statement thenBranch;
-  Statement elseBranch;
+  Expression *condition;
+  Statement *thenBranch;
+  Statement *elseBranch;
 
 public:
-  IfStatement(Expression condition, Statement thenBranch);
-  IfStatement(Expression condition, Statement thenBranch, Statement elseBranch);
+  IfStatement(Expression *condition, Statement *thenBranch);
+  IfStatement(Expression *condition, Statement *thenBranch,
+              Statement *elseBranch);
 
-  Expression getCondition() const;
-  Statement getThenBranch() const;
-  Statement getElseBranch() const;
+  Expression *getCondition() const;
+  Statement *getThenBranch() const;
+  Statement *getElseBranch() const;
 };
 
 class WhileStatement : public Statement {
 private:
-  Expression condition;
-  Statement body;
+  Expression *condition;
+  Statement *body;
 
 public:
-  WhileStatement(Expression condition, Statement body);
+  WhileStatement(Expression *condition, Statement *body);
 
-  Expression getCondition() const;
-  Statement getBody() const;
+  Expression *getCondition() const;
+  Statement *getBody() const;
 };
 
 class ForStatement : public Statement {
 private:
-  Expression initializer;
-  Expression condition;
-  Expression increment;
-  Statement body;
+  Expression *initializer_expr_or_stmt; // Not used as intended by name,
+                                        // structure as defined:
+  Expression *condition;
+  Expression *increment;
+  Statement *body;
 
 public:
-  ForStatement(Expression initializer, Expression condition,
-               Expression increment, Statement body);
-  Expression getInitializer() const;
-  Expression getCondition() const;
-  Expression getIncrement() const;
-  Statement getBody() const;
+  ForStatement(Expression *initializer, Expression *condition,
+               Expression *increment, Statement *body);
+  Expression *getInitializer() const;
+  Expression *getCondition() const;
+  Expression *getIncrement() const;
+  Statement *getBody() const;
 };
 
 class FunctionDeclarationStatement : public Statement {
@@ -136,30 +139,27 @@ private:
   Token name;
   List<List<Token>>
       params; // Will represent list of [DataType param type, param name]
-  BlockStatement body;
+  BlockStatement *body;
   DataTypes returnType;
 
 public:
   FunctionDeclarationStatement(Token name, List<List<Token>> params,
-                               BlockStatement body, DataTypes returnType);
+                               BlockStatement *body, DataTypes returnType);
   FunctionDeclarationStatement(Token name, List<List<Token>> params,
-                               BlockStatement body);
+                               BlockStatement *body);
 
   Token getName() const;
   List<List<Token>> getParams() const;
-  BlockStatement getBody() const;
+  BlockStatement *getBody() const;
   DataTypes getReturnType() const;
 };
 
 class ReturnStatement : public Statement {
-private:
-  Expression value;
-
 public:
   ReturnStatement();
-  ReturnStatement(Expression value);
+  ReturnStatement(Expression *value);
 
-  Expression getValue() const;
+  Expression *getValue() const;
 };
 
 class StructDeclarationStatement : public Statement {
@@ -188,13 +188,13 @@ public:
 class ConstructorDeclarationStatement : public Statement {
 private:
   List<Token> params;
-  BlockStatement body;
+  BlockStatement *body;
 
 public:
-  ConstructorDeclarationStatement(List<Token> params, BlockStatement body);
+  ConstructorDeclarationStatement(List<Token> params, BlockStatement *body);
 
   List<Token> getParams() const;
-  BlockStatement getBody() const;
+  BlockStatement *getBody() const;
 };
 
 class ClassDeclarationStatement : public Statement {
@@ -216,16 +216,16 @@ private:
   Token op;
   List<List<Token>>
       params; // Will represent list of [DataType param type, param name]
-  BlockStatement body;
+  BlockStatement *body;
   DataTypes returnType;
 
 public:
   OperatorDeclarationStatement(Token op, List<List<Token>> params,
-                               BlockStatement body, DataTypes returnType);
+                               BlockStatement *body, DataTypes returnType);
 
   Token getOperator() const;
   List<List<Token>> getParams() const;
-  BlockStatement getBody() const;
+  BlockStatement *getBody() const;
   DataTypes getReturnType() const;
 };
 
