@@ -68,6 +68,10 @@ void runAllTests() {
     testInterpreterPrint();
     std::cout << "testInterpreterVariables" << std::endl;
     testInterpreterVariables();
+    std::cout << "testInterpreterFunctions" << std::endl;
+    testInterpreterFunctions();
+    std::cout << "testInterpreterLoops" << std::endl;
+    testInterpreterLoops();
     std::cout << "All tests passed!" << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Test failed: " << e.what() << std::endl;
@@ -77,12 +81,15 @@ void runAllTests() {
 
 int main(int argc, char *argv[]) {
   bool testing = false;
+  bool help = false;
   std::string filename = "";
 
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
-    if (arg == "--test" || arg == "--tests") {
+    if (arg == "--test" || arg == "--tests" || arg == "-t") {
       testing = true;
+    } else if (arg == "--help" || arg == "-h") {
+      help = true;
     } else {
       filename = arg;
     }
@@ -90,6 +97,20 @@ int main(int argc, char *argv[]) {
 
   if (testing) {
     runAllTests();
+    if (filename == "")
+      return 0;
+  }
+  if (help) {
+    std::cout << "GW Informations: \n"
+              << "- GitHub: https://github.com/Program132/GW/ \n"
+              << "- Version: 1.0.0\n"
+              << "How to use: \n"
+              << "- ./GW <filename> : Run the program and interpret the code "
+                 "from the file\n"
+              << "- ./GW --test : Run all tests\n"
+              << "- ./GW --help : Show this message\n"
+              << "- ./GW : Start the REPL" << std::endl;
+
     if (filename == "")
       return 0;
   }
