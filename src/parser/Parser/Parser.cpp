@@ -9,6 +9,14 @@ void Parser::parse() {
   }
 }
 
+std::ostream &operator<<(std::ostream &os, const Parser &parser) {
+  os << "Statements:" << std::endl;
+  for (int i = 0; i < parser.statements.size(); i++) {
+    os << "  " << *parser.statements.get(i) << std::endl;
+  }
+  return os;
+}
+
 List<Statement *> Parser::getStatements() const { return statements; }
 
 bool Parser::isAtEnd() const { return this->current >= this->tokens.size(); }
@@ -392,10 +400,6 @@ ReturnStatement *Parser::returnStatement() {
 
 BlockStatement *Parser::blockStatement() {
   List<Statement *> blockStatements;
-  // If we're here, we've already consumed '{' (Wait, in blockStatement()
-  // usually we consume here if not in loop) But common pattern is to call it
-  // after consuming '{'
-
   while (!this->checkOperator("}") && !this->isAtEnd()) {
     blockStatements.append(this->statement());
   }
@@ -405,10 +409,21 @@ BlockStatement *Parser::blockStatement() {
   return new BlockStatement(blockStatements);
 }
 
-std::ostream &operator<<(std::ostream &os, const Parser &parser) {
-  os << "Statements:" << std::endl;
-  for (int i = 0; i < parser.statements.size(); i++) {
-    os << "  " << *parser.statements.get(i) << std::endl;
+IfStatement *Parser::ifStatement() {
+  this->advance(); // consume 'if'
+
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after 'if'");
+  Expression *condition = this->getExpression();
+  this->consume(TokenType::OPERATOR, ")", "Expected ')' after condition");
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after condition");
+  BlockStatement *then_branch = this->blockStatement();
+
+  BlockStatement *else_branch = nullptr;
+  if (this->checkIdentifier("else")) {
+    this->advance(); // consume 'else'
+    this->consume(TokenType::OPERATOR, "{", "Expected '{' after 'else'");
+    else_branch = this->blockStatement();
   }
-  return os;
+  return new IfStatement(condition, then_branch, else_branch);
 }

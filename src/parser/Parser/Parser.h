@@ -52,6 +52,7 @@ public:
   FunctionDeclarationStatement *functionDeclarationStatement();
   ReturnStatement *returnStatement();
   BlockStatement *blockStatement();
+  IfStatement *ifStatement();
 
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
