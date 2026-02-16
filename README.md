@@ -21,7 +21,7 @@ Currently an high-performance interpreted language, GW is evolving towards nativ
 
 ---
 
-## ⚡ Quick Peek (Not working yet)
+## ⚡ Quick Peek
 
 See how clean object-oriented programming can be in GW:
 
@@ -56,8 +56,8 @@ class Point {
 var p = Point(1, 2);
 var q = Point(3, 4);
 
-print("Vector Addition: " + (p + q).str()); # -> (4, 6)
-print("Point + Scalar:  " + (p + 5).str()); # -> (6, 7)
+println("Vector Addition: " + (p + q).str()); # -> (4, 6)
+println("Point + Scalar:  " + (p + 5).str()); # -> (6, 7)
 ```
 
 ---
@@ -69,11 +69,13 @@ Dive into the details and start building with GW:
 | Topic | Description |
 | :--- | :--- |
 | 🏁 **[Hello World](doc/hello_world.md)** | Your first steps with GW. |
-| 💎 **[Types](doc/types.md)** | Learn about types management (Integer, Number, String, Boolean). |
-| 📦 **[Variable](doc/variable.md)** | Learn about variables management (declaration, assignment, reassignment). |
-| ⚙️ **[Function](doc/function.md)** | Learn about function management (declaration, call, return). |
-| 🛣️ **[Conditions](doc/conditions.md)** | Learn about conditions management (if & else). |
-| 🔄 **[Loops](doc/loops.md)** | Learn about loops management (while & for). |
+| 💎 **[Types](doc/types.md)** | Explore the core data types. |
+| 📦 **[Variable](doc/variable.md)** | Learn about state management. |
+| ⚙️ **[Function](doc/function.md)** | Define reusable logic. |
+| 🛣️ **[Conditions](doc/conditions.md)** | Logic flow and branching. |
+| 🔁 **[Loops](doc/loops.md)** | Mastering iterations. |
+| 🏗️ **[Struct](doc/struct.md)** | Lightweight data structures. |
+| 🏛️ **[Class](doc/class.md)** | Advanced object-orientation. |
 
 ## Compile & Run
 
