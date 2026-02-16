@@ -2,7 +2,7 @@
 
 DataTypes toDataTypes(Token token) {
   std::string value = token.getValue();
-  if (value == "Int") {
+  if (value == "Integer") {
     return DataTypes::Int;
   } else if (value == "Number") {
     return DataTypes::Number;
