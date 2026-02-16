@@ -1,6 +1,8 @@
 #include "Interpreter.h"
+#include "FlowControlExceptions.h"
 #include "ReturnException.h"
 #include <iostream>
+
 
 Interpreter::Interpreter() { environment = new Environment(); }
 
@@ -121,8 +123,16 @@ void Interpreter::execute(Statement *statement) {
   }
   case WHILE: {
     WhileStatement *stmt = (WhileStatement *)statement;
-    while (evaluate(stmt->getCondition()).asBool()) {
-      execute(stmt->getBody());
+    try {
+      while (evaluate(stmt->getCondition()).asBool()) {
+        try {
+          execute(stmt->getBody());
+        } catch (const ContinueException &) {
+          // Continue loop
+        }
+      }
+    } catch (const BreakException &) {
+      // Break loop
     }
     break;
   }
@@ -135,12 +145,20 @@ void Interpreter::execute(Statement *statement) {
       execute(stmt->getInitializer());
     }
 
-    while (stmt->getCondition() == nullptr ||
-           evaluate(stmt->getCondition()).asBool()) {
-      execute(stmt->getBody());
-      if (stmt->getIncrement() != nullptr) {
-        evaluate(stmt->getIncrement());
+    try {
+      while (stmt->getCondition() == nullptr ||
+             evaluate(stmt->getCondition()).asBool()) {
+        try {
+          execute(stmt->getBody());
+        } catch (const ContinueException &) {
+          // Continue loop
+        }
+        if (stmt->getIncrement() != nullptr) {
+          evaluate(stmt->getIncrement());
+        }
       }
+    } catch (const BreakException &) {
+      // Break loop
     }
 
     Environment *loopEnv = environment;
@@ -158,6 +176,10 @@ void Interpreter::execute(Statement *statement) {
     environment->addClass(stmt->getName().getValue(), stmt);
     break;
   }
+  case BREAK:
+    throw BreakException();
+  case CONTINUE:
+    throw ContinueException();
   case EXPRESSION_STATEMENT: {
     evaluate(statement->getExpression());
     break;
