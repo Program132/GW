@@ -69,9 +69,10 @@ Dive into the details and start building with GW:
 | Topic | Description |
 | :--- | :--- |
 | 🏁 **[Hello World](doc/hello_world.md)** | Your first steps with GW. |
+| 💎 **[Types](doc/types.md)** | Learn about types management (Integer, Number, String, Boolean). |
 | 📦 **[Variable](doc/variable.md)** | Learn about variables management (declaration, assignment, reassignment). |
-| 📦 **[Function](doc/function.md)** | Learn about function management (declaration, call, return). |
-| 📦 **[Conditions](doc/conditions.md)** | Learn about conditions management (if & else). |
+| ⚙️ **[Function](doc/function.md)** | Learn about function management (declaration, call, return). |
+| 🛣️ **[Conditions](doc/conditions.md)** | Learn about conditions management (if & else). |
 
 ## Compile & Run
 
