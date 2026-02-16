@@ -153,6 +153,11 @@ void Interpreter::execute(Statement *statement) {
     environment->addStruct(stmt->getName().getValue(), stmt);
     break;
   }
+  case CLASS_DECLARATION: {
+    ClassDeclarationStatement *stmt = (ClassDeclarationStatement *)statement;
+    environment->addClass(stmt->getName().getValue(), stmt);
+    break;
+  }
   case EXPRESSION_STATEMENT: {
     evaluate(statement->getExpression());
     break;
@@ -202,6 +207,37 @@ Value Interpreter::evaluate(Expression *expression) {
     Value right = evaluate(expression->getChildren().get(0));
     std::string op = expression->getToken().getValue();
 
+    if (right.getType() == VAL_STRUCT &&
+        environment->classExist(right.structName)) {
+      ClassDeclarationStatement *cls = environment->getClass(right.structName);
+      for (int i = 0; i < cls->getOperators().size(); i++) {
+        OperatorDeclarationStatement *opDecl = cls->getOperators().get(i);
+        if (opDecl->getOperator().getValue() == op &&
+            opDecl->getParams().size() == 0) {
+          Environment *opEnv = new Environment(environment);
+          opEnv->addVariable("this", right, right.structName);
+
+          Environment *previousEnv = environment;
+          environment = opEnv;
+
+          Value returnValue;
+          try {
+            for (int j = 0; j < opDecl->getBody()->getStatements().size();
+                 j++) {
+              execute(opDecl->getBody()->getStatements().get(j));
+            }
+          } catch (const ReturnException &e) {
+            returnValue = e.value;
+          }
+
+          environment = previousEnv;
+          delete opEnv;
+
+          return returnValue;
+        }
+      }
+    }
+
     if (op == "-") {
       if (right.isNumber())
         return Value(-right.asDouble());
@@ -218,6 +254,66 @@ Value Interpreter::evaluate(Expression *expression) {
     Value left = evaluate(expression->getChildren().get(0));
     Value right = evaluate(expression->getChildren().get(1));
     std::string op = expression->getToken().getValue();
+
+    if (left.getType() == VAL_STRUCT &&
+        environment->classExist(left.structName)) {
+      ClassDeclarationStatement *cls = environment->getClass(left.structName);
+      for (int i = 0; i < cls->getOperators().size(); i++) {
+        OperatorDeclarationStatement *opDecl = cls->getOperators().get(i);
+        if (opDecl->getOperator().getValue() == op) {
+          if (opDecl->getParams().size() == 1) {
+            std::string paramType =
+                opDecl->getParams().get(0).get(0).getValue();
+            bool match = false;
+
+            if (paramType == "Int" || paramType == "Integer") {
+              if (right.isInt())
+                match = true;
+            } else if (paramType == "Number") {
+              if (right.isNumber())
+                match = true;
+            } else if (paramType == "String") {
+              if (right.isString())
+                match = true;
+            } else if (paramType == "Boolean") {
+              if (right.isBool())
+                match = true;
+            } else if (right.getType() == VAL_STRUCT &&
+                       right.structName == paramType) {
+              match = true;
+            }
+
+            if (match) {
+              Environment *opEnv = new Environment(environment);
+              opEnv->addVariable("this", left, left.structName);
+
+              Token paramName = opDecl->getParams().get(0).get(1);
+              Token paramTypeToken = opDecl->getParams().get(0).get(0);
+              opEnv->addVariable(paramName.getValue(), right,
+                                 paramTypeToken.getValue());
+
+              Environment *previousEnv = environment;
+              environment = opEnv;
+
+              Value returnValue;
+              try {
+                for (int j = 0; j < opDecl->getBody()->getStatements().size();
+                     j++) {
+                  execute(opDecl->getBody()->getStatements().get(j));
+                }
+              } catch (const ReturnException &e) {
+                returnValue = e.value;
+              }
+
+              environment = previousEnv;
+              delete opEnv;
+
+              return returnValue;
+            }
+          }
+        }
+      }
+    }
 
     if (op == "+") {
       return left + right;
@@ -252,56 +348,212 @@ Value Interpreter::evaluate(Expression *expression) {
   }
   case CALL: {
     Expression *calleeExpr = expression->getChildren().get(0);
-    if (calleeExpr->getType() != VARIABLE) {
-      throw std::runtime_error("Only direct function calls are supported");
-    }
 
-    std::string funcName = calleeExpr->getToken().getValue();
-    if (!environment->functionExist(funcName)) {
-      throw std::runtime_error("Function '" + funcName + "' not defined");
-    }
+    if (calleeExpr->getType() == VARIABLE) {
+      std::string name = calleeExpr->getToken().getValue();
 
-    Function func = environment->getFunction(funcName);
-    List<Expression *> argExprs =
-        ((CallExpression *)expression)->getArguments();
+      if (environment->functionExist(name)) {
+        Function func = environment->getFunction(name);
+        List<Expression *> argExprs =
+            ((CallExpression *)expression)->getArguments();
 
-    if (argExprs.size() != func.params.size()) {
-      throw std::runtime_error("Function '" + funcName + "' expects " +
-                               std::to_string(func.params.size()) +
-                               " arguments but got " +
-                               std::to_string(argExprs.size()));
-    }
+        if (argExprs.size() != func.params.size()) {
+          throw std::runtime_error("Function '" + name + "' expects " +
+                                   std::to_string(func.params.size()) +
+                                   " arguments but got " +
+                                   std::to_string(argExprs.size()));
+        }
 
-    List<Value> evaluatedArgs;
-    for (int i = 0; i < argExprs.size(); i++) {
-      evaluatedArgs.append(evaluate(argExprs.get(i)));
-    }
+        List<Value> evaluatedArgs;
+        for (int i = 0; i < argExprs.size(); i++) {
+          evaluatedArgs.append(evaluate(argExprs.get(i)));
+        }
 
-    Environment *funcEnv = new Environment(environment);
+        Environment *funcEnv = new Environment(environment);
 
-    for (int i = 0; i < evaluatedArgs.size(); i++) {
-      Token paramNameToken = func.params.get(i).get(1);
-      Token paramTypeToken = func.params.get(i).get(0);
-      funcEnv->addVariable(paramNameToken.getValue(), evaluatedArgs.get(i),
-                           paramTypeToken.getValue());
-    }
+        for (int i = 0; i < evaluatedArgs.size(); i++) {
+          Token paramNameToken = func.params.get(i).get(1);
+          Token paramTypeToken = func.params.get(i).get(0);
+          funcEnv->addVariable(paramNameToken.getValue(), evaluatedArgs.get(i),
+                               paramTypeToken.getValue());
+        }
 
-    Environment *previousEnv = environment;
-    environment = funcEnv;
+        Environment *previousEnv = environment;
+        environment = funcEnv;
 
-    Value returnValue;
-    try {
-      for (int i = 0; i < func.body.getStatements().size(); i++) {
-        execute(func.body.getStatements().get(i));
+        Value returnValue;
+        try {
+          for (int i = 0; i < func.body.getStatements().size(); i++) {
+            execute(func.body.getStatements().get(i));
+          }
+        } catch (const ReturnException &e) {
+          returnValue = e.value;
+        }
+
+        environment = previousEnv;
+        delete funcEnv;
+
+        return returnValue;
+      } else if (environment->classExist(name)) {
+        ClassDeclarationStatement *cls = environment->getClass(name);
+        List<Expression *> argExprs =
+            ((CallExpression *)expression)->getArguments();
+
+        // Find constructor
+        ConstructorDeclarationStatement *constructor = nullptr;
+        for (int i = 0; i < cls->getConstructors().size(); i++) {
+          if (cls->getConstructors().get(i)->getParams().size() ==
+              argExprs.size()) {
+            constructor = cls->getConstructors().get(i);
+            break;
+          }
+        }
+
+        if (constructor == nullptr) {
+          // Allow default constructor if 0 args and no constructors defined?
+          // Or stricter check.
+          if (argExprs.size() == 0 && cls->getConstructors().size() == 0) {
+            // Default init fields but no constructor logic
+          } else {
+            throw std::runtime_error(
+                "No matching constructor for class '" + name + "' with " +
+                std::to_string(argExprs.size()) + " arguments");
+          }
+        }
+
+        std::map<std::string, Value> members;
+        // Init fields with default Null
+        for (int i = 0; i < cls->getFields().size(); i++) {
+          List<Token> field = cls->getFields().get(i);
+          std::string fieldName = field.get(1).getValue();
+          members[fieldName] = Value();
+        }
+
+        Value instance(name,
+                       &members); // Assuming Value allows mapping instance
+        // Need to set type to VAL_CLASS if constructor allows or logic handles
+        // it. Wait, Value constructor sets typ based on args? Value(string,
+        // map*) sets VAL_STRUCT. Can I differentiate? Value class might need
+        // update to support setting VAL_CLASS. Or treat VAL_STRUCT as generic
+        // Object. Let's use VAL_STRUCT for now as Value.cpp handles it.
+
+        if (constructor != nullptr) {
+          List<Value> evaluatedArgs;
+          for (int i = 0; i < argExprs.size(); i++) {
+            evaluatedArgs.append(evaluate(argExprs.get(i)));
+          }
+
+          Environment *ctorEnv = new Environment(environment);
+          ctorEnv->addVariable("this", instance, name);
+
+          for (int i = 0; i < evaluatedArgs.size(); i++) {
+            Token paramNameToken = constructor->getParams().get(i).get(1);
+            Token paramTypeToken = constructor->getParams().get(i).get(0);
+            ctorEnv->addVariable(paramNameToken.getValue(),
+                                 evaluatedArgs.get(i),
+                                 paramTypeToken.getValue());
+          }
+
+          Environment *previousEnv = environment;
+          environment = ctorEnv;
+
+          try {
+            // Execute constructor body
+            BlockStatement *body = constructor->getBody();
+            for (int i = 0; i < body->getStatements().size(); i++) {
+              execute(body->getStatements().get(i));
+            }
+          } catch (const ReturnException &e) {
+            // Constructors shouldn't return value, but if they do, ignore or
+            // error?
+          }
+
+          environment = previousEnv;
+          delete ctorEnv;
+        }
+
+        return instance;
+      } else {
+        throw std::runtime_error("Function or Class '" + name +
+                                 "' not defined");
       }
-    } catch (const ReturnException &e) {
-      returnValue = e.value;
+    } else if (calleeExpr->getType() == GET) {
+      // Method call
+      GetExpression *getExpr = (GetExpression *)calleeExpr;
+      Value object = evaluate(getExpr->getObject());
+      std::string methodName = getExpr->getName().getValue();
+
+      if (object.getType() != VAL_STRUCT) {
+        throw std::runtime_error("Only instances have methods.");
+      }
+
+      std::string className = object.structName;
+
+      if (!environment->classExist(className)) {
+        throw std::runtime_error("Class '" + className + "' not found.");
+      }
+
+      ClassDeclarationStatement *cls = environment->getClass(className);
+
+      // Find method
+      FunctionDeclarationStatement *method = nullptr;
+      for (int i = 0; i < cls->getMethods().size(); i++) {
+        if (cls->getMethods().get(i)->getName().getValue() == methodName) {
+          method = cls->getMethods().get(i);
+          break;
+        }
+      }
+
+      if (method == nullptr) {
+        throw std::runtime_error("Method '" + methodName +
+                                 "' not found in class '" + className + "'.");
+      }
+
+      List<Expression *> argExprs =
+          ((CallExpression *)expression)->getArguments();
+      if (argExprs.size() != method->getParams().size()) {
+        throw std::runtime_error("Method '" + methodName + "' expects " +
+                                 std::to_string(method->getParams().size()) +
+                                 " arguments.");
+      }
+
+      List<Value> evaluatedArgs;
+      for (int i = 0; i < argExprs.size(); i++) {
+        evaluatedArgs.append(evaluate(argExprs.get(i)));
+      }
+
+      Environment *methodEnv = new Environment(environment);
+      methodEnv->addVariable("this", object, className);
+
+      for (int i = 0; i < evaluatedArgs.size(); i++) {
+        Token paramNameToken = method->getParams().get(i).get(1);
+        Token paramTypeToken = method->getParams().get(i).get(0);
+        methodEnv->addVariable(paramNameToken.getValue(), evaluatedArgs.get(i),
+                               paramTypeToken.getValue());
+      }
+
+      Environment *previousEnv = environment;
+      environment = methodEnv;
+
+      Value returnValue;
+      try {
+        BlockStatement *body = method->getBody();
+        for (int i = 0; i < body->getStatements().size(); i++) {
+          execute(body->getStatements().get(i));
+        }
+      } catch (const ReturnException &e) {
+        returnValue = e.value;
+      }
+
+      environment = previousEnv;
+      delete methodEnv;
+
+      return returnValue;
+
+    } else {
+      throw std::runtime_error(
+          "Only direct function calls or method calls are supported");
     }
-
-    environment = previousEnv;
-    delete funcEnv;
-
-    return returnValue;
   }
   case GET: {
     GetExpression *expr = (GetExpression *)expression;
