@@ -79,10 +79,13 @@ Token Parser::peek_ahead(int offset) {
 }
 
 Token Parser::consume(TokenType type, std::string value, std::string message) {
-  if (this->peek().getType() == type && this->peek().getValue() == value) {
+  if (this->peek().getType() == type &&
+      (value == "" || this->peek().getValue() == value)) {
     return this->advance();
   }
-  throw std::runtime_error(message);
+  throw std::runtime_error(message + " (got '" + this->peek().getValue() +
+                           "' of type " +
+                           std::to_string(this->peek().getType()) + ")");
 }
 
 Expression *Parser::getExpression() { return this->assignment(); }
@@ -293,6 +296,12 @@ Statement *Parser::statement() {
     return functionDeclarationStatement();
   } else if (checkIdentifier("return")) {
     return returnStatement();
+  } else if (checkIdentifier("if")) {
+    return ifStatement();
+  } else if (checkIdentifier("while")) {
+    return whileStatement();
+  } else if (checkIdentifier("for")) {
+    return forStatement();
   } else {
     return expressionStatement();
   }
@@ -426,4 +435,49 @@ IfStatement *Parser::ifStatement() {
     else_branch = this->blockStatement();
   }
   return new IfStatement(condition, then_branch, else_branch);
+}
+
+WhileStatement *Parser::whileStatement() {
+  this->advance(); // consume 'while'
+
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after 'while'");
+  Expression *condition = this->getExpression();
+  this->consume(TokenType::OPERATOR, ")", "Expected ')' after condition");
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after condition");
+  BlockStatement *body = this->blockStatement();
+
+  return new WhileStatement(condition, body);
+}
+
+ForStatement *Parser::forStatement() {
+  this->advance(); // consume 'for'
+
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after 'for'");
+
+  Statement *initializer = nullptr;
+  if (this->matchOperator(";")) {
+    initializer = nullptr;
+  } else if (this->checkIdentifier("var")) {
+    initializer = this->varDeclarationStatement();
+  } else {
+    initializer = this->expressionStatement();
+  }
+
+  Expression *condition = nullptr;
+  if (!this->checkOperator(";")) {
+    condition = this->getExpression();
+  }
+  this->consume(TokenType::OPERATOR, ";", "Expected ';' after loop condition");
+
+  Expression *increment = nullptr;
+  if (!this->checkOperator(")")) {
+    increment = this->getExpression();
+  }
+  this->consume(TokenType::OPERATOR, ")", "Expected ')' after for clauses");
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after for clauses");
+  BlockStatement *body = this->blockStatement();
+
+  return new ForStatement(initializer, condition, increment, body);
 }

@@ -53,6 +53,8 @@ public:
   ReturnStatement *returnStatement();
   BlockStatement *blockStatement();
   IfStatement *ifStatement();
+  WhileStatement *whileStatement();
+  ForStatement *forStatement();
 
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
