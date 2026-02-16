@@ -119,16 +119,15 @@ public:
 
 class ForStatement : public Statement {
 private:
-  Expression *initializer_expr_or_stmt; // Not used as intended by name,
-                                        // structure as defined:
+  Statement *initializer;
   Expression *condition;
   Expression *increment;
   Statement *body;
 
 public:
-  ForStatement(Expression *initializer, Expression *condition,
+  ForStatement(Statement *initializer, Expression *condition,
                Expression *increment, Statement *body);
-  Expression *getInitializer() const;
+  Statement *getInitializer() const;
   Expression *getCondition() const;
   Expression *getIncrement() const;
   Statement *getBody() const;

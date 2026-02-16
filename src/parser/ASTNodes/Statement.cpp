@@ -140,14 +140,12 @@ Expression *WhileStatement::getCondition() const { return condition; }
 
 Statement *WhileStatement::getBody() const { return body; }
 
-ForStatement::ForStatement(Expression *initializer, Expression *condition,
+ForStatement::ForStatement(Statement *initializer, Expression *condition,
                            Expression *increment, Statement *body)
-    : Statement(FOR), initializer_expr_or_stmt(initializer),
-      condition(condition), increment(increment), body(body) {}
+    : Statement(FOR), initializer(initializer), condition(condition),
+      increment(increment), body(body) {}
 
-Expression *ForStatement::getInitializer() const {
-  return initializer_expr_or_stmt;
-}
+Statement *ForStatement::getInitializer() const { return initializer; }
 
 Expression *ForStatement::getCondition() const { return condition; }
 

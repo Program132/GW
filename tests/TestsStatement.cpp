@@ -49,11 +49,12 @@ void testStatement() {
   GW_ASSERT(whileStmt.getCondition()->getType() == ExpressionType::LITERAL);
 
   // ForStatement: for(i; i < 10; i++)
-  ForStatement forStmt(new LiteralExpression(num100),
+  ForStatement forStmt(new ExpressionStatement(new LiteralExpression(num100)),
                        new LiteralExpression(trueTok),
                        new LiteralExpression(num100),
                        new PrintStatement(new LiteralExpression(num100)));
-  GW_ASSERT(forStmt.getInitializer()->getType() == ExpressionType::LITERAL);
+  GW_ASSERT(forStmt.getInitializer()->getType() ==
+            StatementType::EXPRESSION_STATEMENT);
 
   // FunctionDeclarationStatement (Int result, no params)
   List<List<Token>> emptyParams;
