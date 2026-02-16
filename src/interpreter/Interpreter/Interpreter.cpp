@@ -119,6 +119,35 @@ void Interpreter::execute(Statement *statement) {
     }
     break;
   }
+  case WHILE: {
+    WhileStatement *stmt = (WhileStatement *)statement;
+    while (evaluate(stmt->getCondition()).asBool()) {
+      execute(stmt->getBody());
+    }
+    break;
+  }
+  case FOR: {
+    ForStatement *stmt = (ForStatement *)statement;
+    Environment *previousEnv = environment;
+    environment = new Environment(previousEnv);
+
+    if (stmt->getInitializer() != nullptr) {
+      execute(stmt->getInitializer());
+    }
+
+    while (stmt->getCondition() == nullptr ||
+           evaluate(stmt->getCondition()).asBool()) {
+      execute(stmt->getBody());
+      if (stmt->getIncrement() != nullptr) {
+        evaluate(stmt->getIncrement());
+      }
+    }
+
+    Environment *loopEnv = environment;
+    environment = previousEnv;
+    delete loopEnv;
+    break;
+  }
   case EXPRESSION_STATEMENT: {
     evaluate(statement->getExpression());
     break;
