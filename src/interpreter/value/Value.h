@@ -1,6 +1,8 @@
 #ifndef VALUE_H
 #define VALUE_H
 
+#include <map>
+#include <memory> // Added for std::shared_ptr
 #include <string>
 
 enum ValueType {
@@ -22,6 +24,10 @@ private:
     bool boolValue;
   };
   std::string stringValue;
+  std::shared_ptr<std::map<std::string, Value>> structMembers;
+  std::string structName;
+
+  friend class Interpreter;
 
 public:
   // Constructeurs
@@ -31,6 +37,7 @@ public:
   Value(const std::string &value);
   Value(const char *value);
   Value(bool value);
+  Value(std::string structName, std::map<std::string, Value> *members);
 
   // Copy constructor et assignment operator
   Value(const Value &other);

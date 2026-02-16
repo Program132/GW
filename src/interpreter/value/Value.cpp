@@ -1,23 +1,40 @@
 #include "Value.h"
 #include <cmath>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-Value::Value() : type(VAL_NULL), intValue(0) {}
+Value::Value()
+    : type(VAL_NULL), intValue(0), structMembers(nullptr), structName("") {}
 
-Value::Value(int value) : type(VAL_INTEGER), intValue(value) {}
+Value::Value(int value)
+    : type(VAL_INTEGER), intValue(value), structMembers(nullptr),
+      structName("") {}
 
-Value::Value(double value) : type(VAL_NUMBER), doubleValue(value) {}
+Value::Value(double value)
+    : type(VAL_NUMBER), doubleValue(value), structMembers(nullptr),
+      structName("") {}
 
 Value::Value(const std::string &value)
-    : type(VAL_STRING), intValue(0), stringValue(value) {}
+    : type(VAL_STRING), intValue(0), stringValue(value), structMembers(nullptr),
+      structName("") {}
 
 Value::Value(const char *value)
-    : type(VAL_STRING), intValue(0), stringValue(value) {}
+    : type(VAL_STRING), intValue(0), stringValue(value), structMembers(nullptr),
+      structName("") {}
 
-Value::Value(bool value) : type(VAL_BOOLEAN), boolValue(value) {}
+Value::Value(bool value)
+    : type(VAL_BOOLEAN), boolValue(value), structMembers(nullptr),
+      structName("") {}
 
-Value::Value(const Value &other) : type(other.type) {
+Value::Value(std::string structName, std::map<std::string, Value> *members)
+    : type(VAL_STRUCT), intValue(0), structName(structName) {
+  structMembers = std::make_shared<std::map<std::string, Value>>(*members);
+}
+
+Value::Value(const Value &other)
+    : type(other.type), structMembers(other.structMembers),
+      structName(other.structName) {
   switch (type) {
   case VAL_INTEGER:
     intValue = other.intValue;
@@ -31,6 +48,9 @@ Value::Value(const Value &other) : type(other.type) {
   case VAL_BOOLEAN:
     boolValue = other.boolValue;
     break;
+  case VAL_STRUCT:
+    // Shared pointer already copied in initializer list
+    break;
   default:
     intValue = 0;
     break;
@@ -42,8 +62,12 @@ Value &Value::operator=(const Value &other) {
     if (type == VAL_STRING) {
       stringValue.~basic_string();
     }
+    // structMembers handled by shared_ptr assignment below
 
     type = other.type;
+    structName = other.structName;
+    structMembers = other.structMembers;
+
     switch (type) {
     case VAL_INTEGER:
       intValue = other.intValue;
@@ -69,6 +93,7 @@ Value::~Value() {
   if (type == VAL_STRING) {
     stringValue.~basic_string();
   }
+  // shared_ptr handles structMembers deletion
 }
 
 ValueType Value::getType() const { return type; }
