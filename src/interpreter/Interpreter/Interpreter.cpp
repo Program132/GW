@@ -109,6 +109,16 @@ void Interpreter::execute(Statement *statement) {
     }
     throw ReturnException(value);
   }
+  case IF: {
+    IfStatement *stmt = (IfStatement *)statement;
+    Value condition = evaluate(stmt->getCondition());
+    if (condition.asBool()) {
+      execute(stmt->getThenBranch());
+    } else if (stmt->getElseBranch() != nullptr) {
+      execute(stmt->getElseBranch());
+    }
+    break;
+  }
   case EXPRESSION_STATEMENT: {
     evaluate(statement->getExpression());
     break;
