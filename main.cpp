@@ -77,12 +77,17 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    Lexer lex(code);
-    lex.lex();
-    Parser parser(lex.getTokens());
-    parser.parse();
-    Interpreter interpreter(parser.getStatements());
-    interpreter.interpret();
+    try {
+      Lexer lex(code);
+      lex.lex();
+      Parser parser(lex.getTokens());
+      parser.parse();
+      Interpreter interpreter(parser.getStatements());
+      interpreter.interpret();
+    } catch (const std::exception &e) {
+      std::cerr << "Error: " << e.what() << std::endl;
+      return 1;
+    }
   } else {
     REPL repl = REPL("GW> ");
     repl.start();
