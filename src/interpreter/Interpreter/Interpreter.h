@@ -7,21 +7,22 @@
 
 class Interpreter {
 private:
-  List<Statement> statements;
-  Environment environment;
+  List<Statement *> statements;
+  Environment *environment;
 
   Value tokenToValue(const Token &token);
 
 public:
   Interpreter();
-  Interpreter(List<Statement> statements);
+  Interpreter(List<Statement *> statements);
+  virtual ~Interpreter();
 
-  List<Statement> getStatements() const;
-  Environment getEnvironment() const;
+  List<Statement *> getStatements() const;
+  Environment *getEnvironment() const;
 
   void interpret();
-  void execute(Statement statement);
-  Value evaluate(Expression expression);
+  void execute(Statement *statement);
+  Value evaluate(Expression *expression);
 };
 
 #endif
