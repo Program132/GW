@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include <string>
 
 Parser::Parser(List<Token> tokens) : tokens(tokens), current(0) {}
 
@@ -8,7 +9,7 @@ void Parser::parse() {
   }
 }
 
-List<Statement> Parser::getStatements() const { return statements; }
+List<Statement *> Parser::getStatements() const { return statements; }
 
 bool Parser::isAtEnd() const { return this->current >= this->tokens.size(); }
 
@@ -76,231 +77,260 @@ Token Parser::consume(TokenType type, std::string value, std::string message) {
   throw std::runtime_error(message);
 }
 
-Expression Parser::getExpression() { return this->assignment(); }
+Expression *Parser::getExpression() { return this->assignment(); }
 
-Expression Parser::assignment() {
-  Expression expression = this->logicalOr();
+Expression *Parser::assignment() {
+  Expression *expression = this->logicalOr();
 
   if (this->checkType(TokenType::COMPOUND_ASSIGN_OPERATOR)) {
     Token op = this->advance();
-    Expression value = this->assignment();
+    Expression *value = this->assignment();
     std::string base_op_value = op.getValue().substr(
         0, op.getValue().size() - 1); // first character of the operator
     Token baseOp = Token(TokenType::MATH_OPERATOR, base_op_value, op.getLine());
 
-    if (expression.getType() == ExpressionType::VARIABLE) {
-      BinaryExpression nvalue = BinaryExpression(expression, baseOp, value);
-      return AssignExpression(expression.getToken(), nvalue);
-    } else if (expression.getType() == ExpressionType::GET) {
-      GetExpression &expr = (GetExpression &)expression;
-      BinaryExpression nvalue = BinaryExpression(expression, baseOp, value);
-      return SetExpression(expr.getObject(), expression.getToken(), nvalue);
+    if (expression->getType() == ExpressionType::VARIABLE) {
+      BinaryExpression *nvalue =
+          new BinaryExpression(expression, baseOp, value);
+      return new AssignExpression(expression->getToken(), nvalue);
+    } else if (expression->getType() == ExpressionType::GET) {
+      GetExpression *expr = (GetExpression *)expression;
+      BinaryExpression *nvalue =
+          new BinaryExpression(expression, baseOp, value);
+      return new SetExpression(expr->getObject(), expression->getToken(),
+                               nvalue);
     } else {
       throw std::runtime_error("Error: Invalid target assignation line " +
                                std::to_string(op.getLine()));
     }
-  } else if (this->matchOperator("=")) {
-    Token previous = this->previous();
-    Expression value = this->assignment();
+  }
 
-    if (expression.getType() == ExpressionType::VARIABLE) {
-      return AssignExpression(expression.getToken(), value);
-    } else if (expression.getType() == ExpressionType::GET) {
-      GetExpression &expr = (GetExpression &)expression;
-      return SetExpression(expr.getObject(), expression.getToken(), value);
-    } else {
-      throw std::runtime_error("Error: Invalid target assignation line " +
-                               std::to_string(previous.getLine()));
+  if (this->matchOperator("=")) {
+    Token op = this->previous();
+    Expression *value = this->assignment();
+
+    if (expression->getType() == ExpressionType::VARIABLE) {
+      return new AssignExpression(expression->getToken(), value);
+    } else if (expression->getType() == ExpressionType::GET) {
+      GetExpression *expr = (GetExpression *)expression;
+      return new SetExpression(expr->getObject(), expression->getToken(),
+                               value);
     }
+
+    throw std::runtime_error("Error: Invalid target assignation line " +
+                             std::to_string(op.getLine()));
   }
+
   return expression;
 }
 
-Expression Parser::logicalOr() {
-  Expression expression = this->logicalAnd();
+Expression *Parser::logicalOr() {
+  Expression *expression = this->logicalAnd();
 
-  while (this->matchOperator("|")) {
+  while (this->matchOperator("|") || this->matchOperator("||")) {
     Token op = this->previous();
-    Expression right = this->logicalAnd();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->logicalAnd();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::logicalAnd() {
-  Expression expression = this->equality();
+Expression *Parser::logicalAnd() {
+  Expression *expression = this->equality();
 
-  while (this->matchOperator("&")) {
+  while (this->matchOperator("&") || this->matchOperator("&&")) {
     Token op = this->previous();
-    Expression right = this->equality();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->equality();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::equality() {
-  Expression expression = this->comparison();
+Expression *Parser::equality() {
+  Expression *expression = this->comparison();
 
   while (this->matchOperator("==") || this->matchOperator("~=")) {
     Token op = this->previous();
-    Expression right = this->comparison();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->comparison();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::comparison() {
-  Expression expression = this->addition_subtraction();
+Expression *Parser::comparison() {
+  Expression *expression = this->addition_subtraction();
 
-  while (this->matchOperator("<") || this->matchOperator("<=") ||
-         this->matchOperator(">") || this->matchOperator(">=")) {
+  while (this->matchOperator("<") || this->matchOperator(">") ||
+         this->matchOperator("<=") || this->matchOperator(">=")) {
     Token op = this->previous();
-    Expression right = this->addition_subtraction();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->addition_subtraction();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::addition_subtraction() {
-  Expression expression = this->multiplication_division();
+Expression *Parser::addition_subtraction() {
+  Expression *expression = this->multiplication_division();
 
   while (this->matchOperator("+") || this->matchOperator("-")) {
     Token op = this->previous();
-    Expression right = this->multiplication_division();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->multiplication_division();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::multiplication_division() {
-  Expression expression = this->exponentiation();
+Expression *Parser::multiplication_division() {
+  Expression *expression = this->exponentiation();
 
   while (this->matchOperator("*") || this->matchOperator("/") ||
          this->matchOperator("%")) {
     Token op = this->previous();
-    Expression right = this->exponentiation();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->exponentiation();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::exponentiation() {
-  Expression expression = this->unary();
+Expression *Parser::exponentiation() {
+  Expression *expression = this->unary();
 
   while (this->matchOperator("^")) {
     Token op = this->previous();
-    Expression right = this->unary();
-    expression = BinaryExpression(expression, op, right);
+    Expression *right = this->unary();
+    expression = new BinaryExpression(expression, op, right);
   }
 
   return expression;
 }
 
-Expression Parser::unary() {
-  if (this->matchOperator("!") || this->matchOperator("-") ||
-      this->matchOperator("+")) {
+Expression *Parser::unary() {
+  if (this->matchOperator("-") || this->matchOperator("!")) {
     Token op = this->previous();
-    Expression right = this->unary();
-    return UnaryExpression(op, right);
+    Expression *right = this->unary();
+    return new UnaryExpression(op, right);
   }
   return this->call();
 }
 
-Expression Parser::call() {
-  Expression expression = this->primary();
+Expression *Parser::call() {
+  Expression *expression = this->primary();
 
-  while (this->matchOperator("(")) {
-    Token paren = this->previous();
-    List<Expression> arguments;
-    if (!this->checkOperator(")")) {
-      arguments.append(this->getExpression());
-      while (this->matchOperator(",")) {
-        arguments.append(this->getExpression());
+  while (true) {
+    if (this->matchOperator("(")) {
+      List<Expression *> arguments;
+      if (!this->checkOperator(")")) {
+        do {
+          arguments.append(this->getExpression());
+        } while (this->matchOperator(","));
       }
+
+      Token paren = this->consume(TokenType::OPERATOR, ")", "Expected ')'");
+      expression = new CallExpression(expression, paren, arguments);
+    } else if (this->matchOperator(".")) {
+      Token name =
+          this->consume(TokenType::IDENTIFIER, "", "Expected property name");
+      expression = new GetExpression(expression, name);
+    } else {
+      break;
     }
-    this->consume(TokenType::OPERATOR, ")", "Expected ')'");
-    expression = CallExpression(expression, paren, arguments);
   }
 
   return expression;
 }
 
-Expression Parser::primary() {
-  if (this->matchOperator("(")) {
-    Expression expression = this->getExpression();
-    this->consume(TokenType::OPERATOR, ")", "Expected ')'");
-    return GroupingExpression(expression);
-  } else if (this->matchType(TokenType::INT) ||
-             this->matchType(TokenType::NUMBER) ||
-             this->matchType(TokenType::BOOLEAN) ||
-             this->matchType(TokenType::STRING)) {
-    return LiteralExpression(this->previous());
-  } else if (this->matchType(TokenType::IDENTIFIER)) {
-    return VariableExpression(this->previous());
-  } else {
-    throw std::runtime_error("Error: Unexpected token \"" +
-                             this->peek().getValue() + "\" type " +
-                             tokenTypeToString(this->peek().getType()) +
-                             " line " + std::to_string(this->peek().getLine()));
+Expression *Parser::primary() {
+  TokenType t = peek().getType();
+  if (t == TokenType::BOOLEAN || t == TokenType::INT ||
+      t == TokenType::NUMBER || t == TokenType::STRING) {
+    advance();
+    return new LiteralExpression(this->previous());
   }
+
+  if (checkType(TokenType::IDENTIFIER)) {
+    advance();
+    return new VariableExpression(this->previous());
+  }
+
+  if (this->matchOperator("(")) {
+    Expression *expression = this->getExpression();
+    this->consume(TokenType::OPERATOR, ")", "Expected ')'");
+    return new GroupingExpression(expression);
+  }
+
+  throw std::runtime_error("Expected expression line " +
+                           std::to_string(peek().getLine()) + " got '" +
+                           peek().getValue() + "'");
 }
 
-Statement Parser::statement() {
+Statement *Parser::statement() {
+  if (checkOperator("{")) {
+    advance();
+    return blockStatement();
+  }
+
   if (checkIdentifier("print")) {
     return printStatement();
   } else if (checkIdentifier("println")) {
     return printlnStatement();
   } else if (checkIdentifier("var")) {
     return varDeclarationStatement();
+  } else if (checkIdentifier("func")) {
+    return functionDeclarationStatement();
+  } else if (checkIdentifier("return")) {
+    return returnStatement();
   } else {
     return expressionStatement();
   }
 }
 
-ExpressionStatement Parser::expressionStatement() {
-  Expression expression = this->getExpression();
+ExpressionStatement *Parser::expressionStatement() {
+  Expression *expression = this->getExpression();
   this->consume(TokenType::OPERATOR, ";", "Expected ';'");
-  return ExpressionStatement(expression);
+  return new ExpressionStatement(expression);
 }
 
-PrintStatement Parser::printStatement() {
-  this->advance();
+PrintStatement *Parser::printStatement() {
+  this->advance(); // consume 'print'
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after print");
+  Expression *expression = this->getExpression();
+  this->consume(TokenType::OPERATOR, ")", "Expected ')' after expression");
+  this->consume(TokenType::OPERATOR, ";", "Expected ';' after print statement");
+  return new PrintStatement(expression);
+}
 
-  consume(TokenType::OPERATOR, "(", "Expected '('");
-  Expression expression = EmptyExpression();
-  if (!this->checkOperator(")")) {
-    expression = this->getExpression();
+PrintlnStatement *Parser::printlnStatement() {
+  this->advance(); // consume 'println'
+  this->consume(TokenType::OPERATOR, "(", "Expected '(' after println");
+  Expression *expression = this->getExpression();
+  this->consume(TokenType::OPERATOR, ")", "Expected ')' after expression");
+  this->consume(TokenType::OPERATOR, ";",
+                "Expected ';' after println statement");
+  return new PrintlnStatement(expression);
+}
+
+VarDeclarationStatement *Parser::varDeclarationStatement() {
+  this->advance(); // consume 'var'
+  Token name = this->consume(TokenType::IDENTIFIER, "", "Expected identifier");
+
+  Expression *initializer = nullptr;
+  if (this->matchOperator("=")) {
+    initializer = this->getExpression();
   }
 
-  consume(TokenType::OPERATOR, ")", "Expected ')'");
-  this->consume(TokenType::OPERATOR, ";", "Expected ';'");
-
-  return PrintStatement(expression);
+  this->consume(TokenType::OPERATOR, ";",
+                "Expected ';' after variable declaration");
+  return new VarDeclarationStatement(name, initializer);
 }
 
-PrintlnStatement Parser::printlnStatement() {
-  this->advance();
-
-  consume(TokenType::OPERATOR, "(", "Expected '('");
-  Expression expression = EmptyExpression();
-  if (!this->checkOperator(")")) {
-    expression = this->getExpression();
-  }
-
-  consume(TokenType::OPERATOR, ")", "Expected ')'");
-  this->consume(TokenType::OPERATOR, ";", "Expected ';'");
-
-  return PrintlnStatement(expression);
-}
-
-VarDeclarationStatement Parser::varDeclarationStatement() {
-  this->advance();
+FunctionDeclarationStatement *Parser::functionDeclarationStatement() {
+  this->advance(); // consume 'func'
 
   if (!this->checkType(TokenType::IDENTIFIER)) {
     throw std::runtime_error("Error: Expected identifier");
@@ -308,22 +338,77 @@ VarDeclarationStatement Parser::varDeclarationStatement() {
 
   Token name = this->advance();
 
-  Expression expression = EmptyExpression();
-  if (this->matchOperator("=")) {
-    expression = this->getExpression();
+  this->consume(TokenType::OPERATOR, "(",
+                "Expected '(' line " + std::to_string(name.getLine()));
+
+  List<List<Token>> parameters;
+  if (!this->checkOperator(")")) {
+    while (true) {
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected parameter name line " +
+                                 std::to_string(peek().getLine()));
+      }
+      Token paramName = this->advance();
+      this->consume(TokenType::OPERATOR, ":",
+                    "Expected ':' after parameter name");
+
+      Token paramTypeToken = this->advance();
+      List<Token> parameter;
+      parameter.append(paramTypeToken);
+      parameter.append(paramName);
+      parameters.append(parameter);
+
+      if (!this->matchOperator(",")) {
+        break;
+      }
+    }
   }
 
-  this->consume(TokenType::OPERATOR, ";",
-                "Expected ';' line " + std::to_string(name.getLine()));
+  this->consume(TokenType::OPERATOR, ")", "Expected ')'");
 
-  return VarDeclarationStatement(name, expression);
+  DataTypes returnType = DataTypes::Null;
+  if (this->matchOperator("->")) {
+    Token returnTypeToken = this->advance();
+    returnType = toDataTypes(returnTypeToken);
+  }
+
+  this->consume(TokenType::OPERATOR, "{",
+                "Expected '{' line " + std::to_string(name.getLine()));
+
+  BlockStatement *block = this->blockStatement();
+
+  return new FunctionDeclarationStatement(name, parameters, block, returnType);
+}
+
+ReturnStatement *Parser::returnStatement() {
+  this->advance(); // consume 'return'
+  Expression *value = nullptr;
+  if (!this->checkOperator(";")) {
+    value = this->getExpression();
+  }
+  this->consume(TokenType::OPERATOR, ";", "Expected ';' after return value");
+  return new ReturnStatement(value);
+}
+
+BlockStatement *Parser::blockStatement() {
+  List<Statement *> blockStatements;
+  // If we're here, we've already consumed '{' (Wait, in blockStatement()
+  // usually we consume here if not in loop) But common pattern is to call it
+  // after consuming '{'
+
+  while (!this->checkOperator("}") && !this->isAtEnd()) {
+    blockStatements.append(this->statement());
+  }
+
+  this->consume(TokenType::OPERATOR, "}", "Expected '}' after block");
+
+  return new BlockStatement(blockStatements);
 }
 
 std::ostream &operator<<(std::ostream &os, const Parser &parser) {
   os << "Statements:" << std::endl;
   for (int i = 0; i < parser.statements.size(); i++) {
-    Statement s = parser.statements.get(i);
-    os << "  " << s << std::endl;
+    os << "  " << *parser.statements.get(i) << std::endl;
   }
   return os;
 }

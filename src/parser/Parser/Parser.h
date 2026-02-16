@@ -10,15 +10,15 @@ class Parser {
 private:
   List<Token> tokens;
   int current;
-  List<Statement> statements;
+  List<Statement *> statements;
 
 public:
   Parser(List<Token> tokens);
 
   void parse();
-  List<Statement> getStatements() const;
+  List<Statement *> getStatements() const;
   bool isAtEnd() const;
-  Statement statement();
+  Statement *statement();
 
   bool checkIdentifier(std::string name);
   bool checkType(TokenType type);
@@ -32,23 +32,26 @@ public:
   Token peek_ahead(int offset);
   Token consume(TokenType type, std::string value, std::string message);
 
-  Expression getExpression();
-  Expression primary();
-  Expression assignment();
-  Expression logicalOr();
-  Expression logicalAnd();
-  Expression equality();
-  Expression comparison();
-  Expression addition_subtraction();
-  Expression multiplication_division();
-  Expression exponentiation();
-  Expression unary();
-  Expression call();
+  Expression *getExpression();
+  Expression *primary();
+  Expression *assignment();
+  Expression *logicalOr();
+  Expression *logicalAnd();
+  Expression *equality();
+  Expression *comparison();
+  Expression *addition_subtraction();
+  Expression *multiplication_division();
+  Expression *exponentiation();
+  Expression *unary();
+  Expression *call();
 
-  ExpressionStatement expressionStatement();
-  PrintStatement printStatement();
-  PrintlnStatement printlnStatement();
-  VarDeclarationStatement varDeclarationStatement();
+  ExpressionStatement *expressionStatement();
+  PrintStatement *printStatement();
+  PrintlnStatement *printlnStatement();
+  VarDeclarationStatement *varDeclarationStatement();
+  FunctionDeclarationStatement *functionDeclarationStatement();
+  ReturnStatement *returnStatement();
+  BlockStatement *blockStatement();
 
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
