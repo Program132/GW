@@ -68,7 +68,7 @@ void testInterpreterPrint() {
   }
 
   {
-    std::string output = captureOutput("println();");
+    std::string output = captureOutput("println(\"\");");
     GW_ASSERT(output == "\n");
   }
 
@@ -279,7 +279,7 @@ void testInterpreterPrint() {
 
   {
     std::string output = captureOutput("println(\"Test\"); print(123); "
-                                       "println(); println(\"Done\");");
+                                       "println(\"\"); println(\"Done\");");
     GW_ASSERT(output == "Test\n123\nDone\n");
   }
 }

@@ -90,7 +90,7 @@ void testParserVariables() {
 void testParserStatements() {
   // Multiple statements
   {
-    Lexer lex("x = 5; y = 10; print(x + y); println();");
+    Lexer lex("x = 5; y = 10; print(x + y); println(\"\");");
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();
@@ -104,7 +104,7 @@ void testParserStatements() {
 
   // Empty print/println
   {
-    Lexer lex("print(); println();");
+    Lexer lex("print(\"\"); println(\"\");");
     lex.lex();
     Parser p(lex.getTokens());
     p.parse();

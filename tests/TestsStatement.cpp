@@ -70,7 +70,7 @@ void testStatement() {
   GW_ASSERT(retVal.getValue()->getType() == ExpressionType::LITERAL);
 
   ReturnStatement retEmpty;
-  GW_ASSERT(retEmpty.getValue()->getType() == ExpressionType::EMPTY_EXPR);
+  GW_ASSERT(retEmpty.getValue() == nullptr);
 
   // StructDeclarationStatement
   List<List<Token>> fields;

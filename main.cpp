@@ -16,31 +16,57 @@
 void runAllTests() {
   try {
     std::cout << "Running tests..." << std::endl;
+    std::cout << "testIntList" << std::endl;
     testIntList();
+    std::cout << "testStringList" << std::endl;
     testStringList();
+    std::cout << "testToken" << std::endl;
     testToken();
+    std::cout << "testLexerIntegers" << std::endl;
     testLexerIntegers();
+    std::cout << "testLexerNumbers" << std::endl;
     testLexerNumbers();
+    std::cout << "testLexerBooleans" << std::endl;
     testLexerBooleans();
+    std::cout << "testLexerStrings" << std::endl;
     testLexerStrings();
+    std::cout << "testLexerMathOperators" << std::endl;
     testLexerMathOperators();
+    std::cout << "testLexerComparisonOperators" << std::endl;
     testLexerComparisonOperators();
+    std::cout << "testLexerBooleanOperators" << std::endl;
     testLexerBooleanOperators();
+    std::cout << "testLexerComments" << std::endl;
     testLexerComments();
+    std::cout << "testLexerIdentifiers" << std::endl;
     testLexerIdentifiers();
+    std::cout << "testLexerComplexExpression" << std::endl;
     testLexerComplexExpression();
+    std::cout << "testLexerMultipleLines" << std::endl;
     testLexerMultipleLines();
+    std::cout << "testLexerStringWithSpecialChars" << std::endl;
     testLexerStringWithSpecialChars();
+    std::cout << "testLexerParenthesesAndBrackets" << std::endl;
     testLexerParenthesesAndBrackets();
+    std::cout << "testLexerEmptyString" << std::endl;
     testLexerEmptyString();
+    std::cout << "testLexerWhitespaceOnly" << std::endl;
     testLexerWhitespaceOnly();
+    std::cout << "testExpression" << std::endl;
     testExpression();
+    std::cout << "testStatement" << std::endl;
     testStatement();
+    std::cout << "testParserExpressions" << std::endl;
     testParserExpressions();
+    std::cout << "testParserVariables" << std::endl;
     testParserVariables();
+    std::cout << "testParserStatements" << std::endl;
     testParserStatements();
+    std::cout << "testParserPrecedence" << std::endl;
     testParserPrecedence();
+    std::cout << "testInterpreterPrint" << std::endl;
     testInterpreterPrint();
+    std::cout << "testInterpreterVariables" << std::endl;
     testInterpreterVariables();
     std::cout << "All tests passed!" << std::endl;
   } catch (const std::exception &e) {
@@ -55,7 +81,7 @@ int main(int argc, char *argv[]) {
 
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
-    if (arg == "--test") {
+    if (arg == "--test" || arg == "--tests") {
       testing = true;
     } else {
       filename = arg;
@@ -71,7 +97,7 @@ int main(int argc, char *argv[]) {
   if (filename != "") {
     FileReader fileReader(filename);
     std::string code = fileReader.getContent();
-    if (code.empty()) {
+    if (code.empty() && !testing) {
       std::cerr << "Error: File is empty or could not be read: " << filename
                 << std::endl;
       return 1;
