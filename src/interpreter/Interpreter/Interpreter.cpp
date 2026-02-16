@@ -148,6 +148,11 @@ void Interpreter::execute(Statement *statement) {
     delete loopEnv;
     break;
   }
+  case STRUCT_DECLARATION: {
+    StructDeclarationStatement *stmt = (StructDeclarationStatement *)statement;
+    environment->addStruct(stmt->getName().getValue(), stmt);
+    break;
+  }
   case EXPRESSION_STATEMENT: {
     evaluate(statement->getExpression());
     break;
@@ -164,10 +169,20 @@ Value Interpreter::evaluate(Expression *expression) {
   }
   case VARIABLE: {
     std::string varName = expression->getToken().getValue();
-    if (!environment->variableExist(varName)) {
-      throw std::runtime_error("Undefined variable '" + varName + "'");
+    if (environment->variableExist(varName)) {
+      return environment->getVariableValue(varName);
     }
-    return environment->getVariableValue(varName);
+    if (environment->structExist(varName)) {
+      StructDeclarationStatement *stmt = environment->getStruct(varName);
+      std::map<std::string, Value> members;
+      for (int i = 0; i < stmt->getFields().size(); i++) {
+        List<Token> field = stmt->getFields().get(i);
+        std::string fieldName = field.get(1).getValue();
+        members[fieldName] = Value();
+      }
+      return Value(varName, &members);
+    }
+    throw std::runtime_error("Undefined variable '" + varName + "'");
   }
   case ASSIGN: {
     std::string varName = expression->getToken().getValue();
@@ -194,6 +209,8 @@ Value Interpreter::evaluate(Expression *expression) {
         throw std::runtime_error("Unary minus requires number operand");
     } else if (op == "!") {
       return Value(!right.asBool());
+    } else if (op == "+") {
+      return +right;
     }
     throw std::runtime_error("Unknown unary operator: " + op);
   }
@@ -203,50 +220,34 @@ Value Interpreter::evaluate(Expression *expression) {
     std::string op = expression->getToken().getValue();
 
     if (op == "+") {
-      if (left.isNumber() && right.isNumber())
-        return Value(left.asDouble() + right.asDouble());
-      else if (left.isString() && right.isString())
-        return Value(left.asString() + right.asString());
-      else if (left.isString())
-        return Value(left.asString() + right.toString());
-      else if (right.isString())
-        return Value(left.toString() + right.asString());
-      else
-        throw std::runtime_error("Invalid operands for '+' operator");
+      return left + right;
     } else if (op == "-") {
-      return Value(left.asDouble() - right.asDouble());
+      return left - right;
     } else if (op == "*") {
-      return Value(left.asDouble() * right.asDouble());
+      return left * right;
     } else if (op == "/") {
-      if (right.asDouble() == 0)
-        throw std::runtime_error("Division by zero");
-      return Value(left.asDouble() / right.asDouble());
+      return left / right;
+    } else if (op == "%") {
+      return left % right;
+    } else if (op == "^") {
+      return left.pow(right);
     } else if (op == "==") {
       return Value(left == right);
-    } else if (op == "!=") {
-      return Value(!(left == right));
+    } else if (op == "!=" || op == "~=") {
+      return Value(left != right);
     } else if (op == "<") {
-      return Value(left.asDouble() < right.asDouble());
+      return Value(left < right);
     } else if (op == ">") {
-      return Value(left.asDouble() > right.asDouble());
+      return Value(left > right);
     } else if (op == "<=") {
-      return Value(left.asDouble() <= right.asDouble());
+      return Value(left <= right);
     } else if (op == ">=") {
-      return Value(left.asDouble() >= right.asDouble());
+      return Value(left >= right);
     } else if (op == "&" || op == "&&") {
-      if (!left.isBool() || !right.isBool()) {
-        throw std::runtime_error(
-            "Logical AND operator requires boolean operands");
-      }
       return Value(left.asBool() && right.asBool());
     } else if (op == "|" || op == "||") {
-      if (!left.isBool() || !right.isBool()) {
-        throw std::runtime_error(
-            "Logical OR operator requires boolean operands");
-      }
       return Value(left.asBool() || right.asBool());
     }
-
     throw std::runtime_error("Unknown binary operator: " + op);
   }
   case CALL: {
@@ -303,7 +304,37 @@ Value Interpreter::evaluate(Expression *expression) {
     return returnValue;
   }
   case GET: {
-    return Value("[Get Property]");
+    GetExpression *expr = (GetExpression *)expression;
+    Value object = evaluate(expr->getObject());
+
+    if (object.getType() != VAL_STRUCT) {
+      throw std::runtime_error("Only instances have properties.");
+    }
+
+    std::string name = expr->getName().getValue();
+    if (object.structMembers->find(name) != object.structMembers->end()) {
+      return (*object.structMembers)[name];
+    }
+
+    throw std::runtime_error("Undefined property '" + name + "'.");
+  }
+  case SET: {
+    SetExpression *expr = (SetExpression *)expression;
+    Value object = evaluate(expr->getObject());
+
+    if (object.getType() != VAL_STRUCT) {
+      throw std::runtime_error("Only instances have properties.");
+    }
+
+    std::string name = expr->getName().getValue();
+    Value value = evaluate(expr->getValue());
+
+    if (object.structMembers->find(name) != object.structMembers->end()) {
+      (*object.structMembers)[name] = value;
+      return value;
+    }
+
+    throw std::runtime_error("Undefined property '" + name + "'.");
   }
   case EMPTY_EXPR:
     return Value();
