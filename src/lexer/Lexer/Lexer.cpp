@@ -117,6 +117,10 @@ void Lexer::lex() {
                                 std::string(1, c), line);
           this->current.appendCharacter(this->code[i + 1]);
           i += 1;
+        } else if (c == '-' && i + 1 < this->code.length() &&
+                   this->code[i + 1] == '>') {
+          this->current = Token(TokenType::OPERATOR, "->", line);
+          i += 1;
         } else {
           this->current =
               Token(TokenType::MATH_OPERATOR, std::string(1, c), line);
@@ -143,11 +147,19 @@ void Lexer::lex() {
       } else {
         this->appendToken();
         if (c == '&') {
-          this->current =
-              Token(TokenType::AND_OPERATOR, std::string(1, c), line);
+          std::string value(1, c);
+          if (i + 1 < this->code.length() && this->code[i + 1] == '&') {
+            value += this->code[i + 1];
+            i += 1;
+          }
+          this->current = Token(TokenType::AND_OPERATOR, value, line);
         } else if (c == '|') {
-          this->current =
-              Token(TokenType::OR_OPERATOR, std::string(1, c), line);
+          std::string value(1, c);
+          if (i + 1 < this->code.length() && this->code[i + 1] == '|') {
+            value += this->code[i + 1];
+            i += 1;
+          }
+          this->current = Token(TokenType::OR_OPERATOR, value, line);
         } else if (c == '!') {
           this->current =
               Token(TokenType::NOT_OPERATOR, std::string(1, c), line);
