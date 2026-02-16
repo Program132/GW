@@ -13,90 +13,102 @@
 #include "src/lexer/Lexer/Lexer.h"
 #include "src/parser/Parser/Parser.h"
 
+void runAllTests() {
+  try {
+    std::cout << "Running tests..." << std::endl;
+    testIntList();
+    testStringList();
+    testToken();
+    testLexerIntegers();
+    testLexerNumbers();
+    testLexerBooleans();
+    testLexerStrings();
+    testLexerMathOperators();
+    testLexerComparisonOperators();
+    testLexerBooleanOperators();
+    testLexerComments();
+    testLexerIdentifiers();
+    testLexerComplexExpression();
+    testLexerMultipleLines();
+    testLexerStringWithSpecialChars();
+    testLexerParenthesesAndBrackets();
+    testLexerEmptyString();
+    testLexerWhitespaceOnly();
+    testExpression();
+    testStatement();
+    testParserExpressions();
+    testParserVariables();
+    testParserStatements();
+    testParserPrecedence();
+    testInterpreterPrint();
+    testInterpreterVariables();
+    std::cout << "All tests passed!" << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Test failed: " << e.what() << std::endl;
+    exit(1);
+  }
+}
+
 int main(int argc, char *argv[]) {
-  /* =================== TESTS =================== */
-  /* =================== Lists =================== */
-  testIntList();
-  testStringList();
-  /* ============================================= */
-  /* ============================================= */
+  bool testing = false;
+  std::string filename = "";
 
-  /* =================== TESTS =================== */
-  /* =================== Token =================== */
-  testToken();
-  /* ============================================= */
-  /* ============================================= */
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if (arg == "--test") {
+      testing = true;
+    } else {
+      filename = arg;
+    }
+  }
 
-  /* =================== TESTS =================== */
-  /* =================== Lexer =================== */
-  testLexerIntegers();
-  testLexerNumbers();
-  testLexerBooleans();
-  testLexerStrings();
-  testLexerMathOperators();
-  testLexerComparisonOperators();
-  testLexerBooleanOperators();
-  testLexerComments();
-  testLexerIdentifiers();
-  testLexerComplexExpression();
-  testLexerMultipleLines();
-  testLexerStringWithSpecialChars();
-  testLexerParenthesesAndBrackets();
-  testLexerEmptyString();
-  testLexerWhitespaceOnly();
-  /* ============================================= */
-  /* ============================================= */
+  if (testing) {
+    runAllTests();
+    if (filename == "")
+      return 0;
+  }
 
-  /* =================== TESTS =================== */
-  /* =================== Expressions ============= */
-  testExpression();
-  /* ============================================= */
-  /* ============================================= */
+  if (filename != "") {
+    FileReader fileReader(filename);
+    std::string code = fileReader.getContent();
+    if (code.empty()) {
+      std::cerr << "Error: File is empty or could not be read: " << filename
+                << std::endl;
+      return 1;
+    }
 
-  /* =================== TESTS =================== */
-  /* =================== Statements ============= */
-  testStatement();
-  /* ============================================= */
-  /* ============================================= */
-
-  /* =================== TESTS =================== */
-  /* =================== Parser ================== */
-  testParserExpressions();
-  testParserVariables();
-  testParserStatements();
-  testParserPrecedence();
-  /* ============================================= */
-  /* ============================================= */
-
-  /* =================== TESTS =================== */
-  /* =================== Interpreter ============= */
-  testInterpreterPrint();
-  testInterpreterVariables();
-  /* ============================================= */
-  /* ============================================= */
-
-  if (argc > 1) {
-    FileReader fileReader(argv[1]);
-    Lexer lex = Lexer(fileReader.getContent());
-    Parser parser = Parser(lex.getTokens());
-    Interpreter interpreter = Interpreter(parser.getStatements());
+    Lexer lex(code);
+    lex.lex();
+    Parser parser(lex.getTokens());
+    parser.parse();
+    Interpreter interpreter(parser.getStatements());
     interpreter.interpret();
   } else {
     REPL repl = REPL("GW> ");
     repl.start();
 
+    std::cout << "GW Interpreter" << std::endl;
+    std::cout << "Type 'exit' or 'quit' to leave." << std::endl;
+    std::cout.flush();
+
     while (true) {
       std::string line = repl.readLine();
       if (line == "exit" || line == "quit")
         break;
+      if (line.empty())
+        continue;
 
-      Lexer lex(line);
-      lex.lex();
-      Parser p(lex.getTokens());
-      p.parse();
-      Interpreter interp(p.getStatements());
-      interp.interpret();
-      std::cout << std::endl;
+      try {
+        Lexer lex(line);
+        lex.lex();
+        Parser p(lex.getTokens());
+        p.parse();
+        Interpreter interp(p.getStatements());
+        interp.interpret();
+        std::cout << std::endl;
+      } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+      }
     }
   }
 
