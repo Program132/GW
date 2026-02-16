@@ -222,7 +222,8 @@ Expression *Parser::exponentiation() {
 }
 
 Expression *Parser::unary() {
-  if (this->matchOperator("-") || this->matchOperator("!")) {
+  if (this->matchOperator("-") || this->matchOperator("!") ||
+      this->matchOperator("+")) {
     Token op = this->previous();
     Expression *right = this->unary();
     return new UnaryExpression(op, right);
@@ -302,6 +303,8 @@ Statement *Parser::statement() {
     return whileStatement();
   } else if (checkIdentifier("for")) {
     return forStatement();
+  } else if (checkIdentifier("struct")) {
+    return structDeclarationStatement();
   } else {
     return expressionStatement();
   }
@@ -480,4 +483,43 @@ ForStatement *Parser::forStatement() {
   BlockStatement *body = this->blockStatement();
 
   return new ForStatement(initializer, condition, increment, body);
+}
+
+StructDeclarationStatement *Parser::structDeclarationStatement() {
+  this->advance(); // consume 'struct'
+
+  if (!this->checkType(TokenType::IDENTIFIER)) {
+    throw std::runtime_error("Expected identifier line " +
+                             std::to_string(peek().getLine()));
+  }
+  Token name = this->advance();
+
+  this->consume(TokenType::OPERATOR, "{", "Expected '{' after struct name");
+
+  List<List<Token>> fields;
+  if (!this->checkOperator("}")) {
+    while (!this->isAtEnd() && !this->checkOperator("}")) {
+      Token fieldName =
+          this->consume(TokenType::IDENTIFIER, "", "Expected field name");
+      this->consume(TokenType::OPERATOR, ":", "Expected ':' after field name");
+
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected type after field name");
+      }
+      Token typeToken = this->advance();
+
+      List<Token> field;
+      field.append(typeToken);
+      field.append(fieldName);
+      fields.append(field);
+
+      if (!this->matchOperator(",")) {
+        break;
+      }
+    }
+  }
+
+  this->consume(TokenType::OPERATOR, "}", "Expected '}' after struct body");
+
+  return new StructDeclarationStatement(name, fields);
 }
