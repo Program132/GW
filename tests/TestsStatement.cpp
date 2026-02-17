@@ -88,7 +88,7 @@ void testStatement() {
   List<ConstructorDeclarationStatement *> emptyConstructors;
   List<OperatorDeclarationStatement *> emptyOperators;
   ClassDeclarationStatement classDecl(
-      Token(TokenType::IDENTIFIER, "MyClass", 1), fields, emptyMethods,
+      Token(TokenType::IDENTIFIER, "MyClass", 1), Token(), fields, emptyMethods,
       emptyConstructors, emptyOperators);
   GW_ASSERT(classDecl.getName().getValue() == "MyClass");
 
