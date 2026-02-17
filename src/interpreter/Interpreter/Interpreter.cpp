@@ -727,6 +727,8 @@ Value Interpreter::tokenToValue(const Token &token) {
       return Value(value[0]);
     }
     return Value(); // Should not happen for valid CHAR tokens
+  case TokenType::NULL_TOKEN:
+    return Value();
   default:
     return Value();
   }

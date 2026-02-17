@@ -27,6 +27,13 @@ void Lexer::appendToken() {
     return;
   }
 
+  if (type == TokenType::IDENTIFIER && value == "null") {
+    this->current.setType(TokenType::NULL_TOKEN);
+    this->tokens.append(this->current);
+    this->current = Token();
+    return;
+  }
+
   if (type == TokenType::WHITESPACE || type == TokenType::COMMENT) {
     this->current = Token();
     return;
