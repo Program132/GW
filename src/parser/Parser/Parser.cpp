@@ -259,9 +259,9 @@ Expression *Parser::call() {
 
 Expression *Parser::primary() {
   TokenType t = peek().getType();
-  if (t == TokenType::BOOLEAN || t == TokenType::INT ||
-      t == TokenType::NUMBER || t == TokenType::STRING ||
-      t == TokenType::CHAR || t == TokenType::NULL_TOKEN) {
+  if (t == TokenType::BOOLEAN_TOKEN || t == TokenType::INT_TOKEN ||
+      t == TokenType::NUMBER_TOKEN || t == TokenType::STRING ||
+      t == TokenType::CHAR_TOKEN || t == TokenType::NULL_TOKEN) {
     advance();
     return new LiteralExpression(this->previous());
   }
