@@ -4,8 +4,8 @@
 #include "../src/utils/Assert.h"
 
 void testExpression() {
-  Token number42(TokenType::NUMBER, "42", 1);
-  Token number10(TokenType::NUMBER, "10", 1);
+  Token number42(TokenType::NUMBER_TOKEN, "42", 1);
+  Token number10(TokenType::NUMBER_TOKEN, "10", 1);
   Token plusToken(TokenType::MATH_OPERATOR, "+", 1);
   Token starToken(TokenType::MATH_OPERATOR, "*", 1);
   Token nameX(TokenType::IDENTIFIER, "x", 1);
@@ -16,7 +16,7 @@ void testExpression() {
   GW_ASSERT(literal42.getType() == ExpressionType::LITERAL);
   GW_ASSERT(literal42.getValue().getValue() == "42");
 
-  LiteralExpression literalTrue(Token(TokenType::BOOLEAN, "true", 1));
+  LiteralExpression literalTrue(Token(TokenType::BOOLEAN_TOKEN, "true", 1));
   GW_ASSERT(literalTrue.getValue().getValue() == "true");
 
   // Variable Expression

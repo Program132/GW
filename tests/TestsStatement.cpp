@@ -5,7 +5,7 @@
 
 void testStatement() {
   Token nameVar(TokenType::IDENTIFIER, "v", 1);
-  Token num100(TokenType::NUMBER, "100", 1);
+  Token num100(TokenType::NUMBER_TOKEN, "100", 1);
   LiteralExpression lit100(num100);
 
   // VarDeclarationStatement: v = 100
@@ -35,7 +35,7 @@ void testStatement() {
   GW_ASSERT(block.getStatements().size() == 2);
 
   // IfStatement (If-Then-Else)
-  Token trueTok(TokenType::BOOLEAN, "true", 1);
+  Token trueTok(TokenType::BOOLEAN_TOKEN, "true", 1);
   IfStatement ifElse(new LiteralExpression(trueTok),
                      new PrintStatement(new LiteralExpression(num100)),
                      new ExpressionStatement(new LiteralExpression(num100)));
@@ -76,7 +76,7 @@ void testStatement() {
   // StructDeclarationStatement
   List<List<Token>> fields;
   List<Token> field1;
-  field1.append(Token(TokenType::INT, "int", 1));
+  field1.append(Token(TokenType::INT_TOKEN, "int", 1));
   field1.append(Token(TokenType::IDENTIFIER, "age", 1));
   fields.append(field1);
   StructDeclarationStatement structDecl(

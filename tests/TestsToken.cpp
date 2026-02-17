@@ -18,8 +18,8 @@ void testToken() {
   token.appendString("bc");
   GW_ASSERT(token.getValue() == "testabc");
 
-  token.setType(TokenType::INT);
-  GW_ASSERT(token.getType() == TokenType::INT);
+  token.setType(TokenType::INT_TOKEN);
+  GW_ASSERT(token.getType() == TokenType::INT_TOKEN);
 
   token.setValue("test");
   GW_ASSERT(token.getValue() == "test");
@@ -27,17 +27,17 @@ void testToken() {
   token.setLine(1);
   GW_ASSERT(token.getLine() == 1);
 
-  Token token2(TokenType::INT, "1236545644564", 1);
+  Token token2(TokenType::INT_TOKEN, "1236545644564", 1);
   GW_ASSERT(token2.getValue() == "1236545644564");
-  GW_ASSERT(token2.getType() == TokenType::INT);
+  GW_ASSERT(token2.getType() == TokenType::INT_TOKEN);
   GW_ASSERT(token2.getLine() == 1);
 
-  Token token3(TokenType::BOOLEAN,
+  Token token3(TokenType::BOOLEAN_TOKEN,
                "zaekahjehejkaehkzaehzkjaehaehehzakezaehzakehakekaehzajkehakeh",
                1);
   GW_ASSERT(token3.getValue() ==
             "zaekahjehejkaehkzaehzkjaehaehehzakezaehzakehakekaehzajkehakeh");
-  GW_ASSERT(token3.getType() == TokenType::BOOLEAN);
+  GW_ASSERT(token3.getType() == TokenType::BOOLEAN_TOKEN);
   GW_ASSERT(token3.getLine() == 1);
 
   Token token4(TokenType::STRING, "test", 1645464654);

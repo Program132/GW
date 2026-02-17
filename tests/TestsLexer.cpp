@@ -11,7 +11,7 @@ void testLexerIntegers() {
   List<Token> tokens = lexer.getTokens();
 
   GW_ASSERT(tokens.size() == 1);
-  GW_ASSERT(tokens.get(0).getType() == TokenType::INT);
+  GW_ASSERT(tokens.get(0).getType() == TokenType::INT_TOKEN);
   GW_ASSERT(tokens.get(0).getValue() == "42");
 }
 
@@ -21,7 +21,7 @@ void testLexerNumbers() {
   List<Token> tokens = lexer.getTokens();
 
   GW_ASSERT(tokens.size() == 1);
-  GW_ASSERT(tokens.get(0).getType() == TokenType::NUMBER);
+  GW_ASSERT(tokens.get(0).getType() == TokenType::NUMBER_TOKEN);
   GW_ASSERT(tokens.get(0).getValue() == "3.14");
 }
 
@@ -31,7 +31,7 @@ void testLexerBooleans() {
   List<Token> tokens1 = lexer1.getTokens();
 
   GW_ASSERT(tokens1.size() == 1);
-  GW_ASSERT(tokens1.get(0).getType() == TokenType::BOOLEAN);
+  GW_ASSERT(tokens1.get(0).getType() == TokenType::BOOLEAN_TOKEN);
   GW_ASSERT(tokens1.get(0).getValue() == "true");
 
   Lexer lexer2("false");
@@ -39,7 +39,7 @@ void testLexerBooleans() {
   List<Token> tokens2 = lexer2.getTokens();
 
   GW_ASSERT(tokens2.size() == 1);
-  GW_ASSERT(tokens2.get(0).getType() == TokenType::BOOLEAN);
+  GW_ASSERT(tokens2.get(0).getType() == TokenType::BOOLEAN_TOKEN);
   GW_ASSERT(tokens2.get(0).getValue() == "false");
 }
 
@@ -59,10 +59,10 @@ void testLexerMathOperators() {
   List<Token> tokens1 = lexer1.getTokens();
 
   GW_ASSERT(tokens1.size() == 3);
-  GW_ASSERT(tokens1.get(0).getType() == TokenType::INT);
+  GW_ASSERT(tokens1.get(0).getType() == TokenType::INT_TOKEN);
   GW_ASSERT(tokens1.get(1).getType() == TokenType::MATH_OPERATOR);
   GW_ASSERT(tokens1.get(1).getValue() == "+");
-  GW_ASSERT(tokens1.get(2).getType() == TokenType::INT);
+  GW_ASSERT(tokens1.get(2).getType() == TokenType::INT_TOKEN);
 
   Lexer lexer2("5 - 3");
   lexer2.lex();
@@ -185,11 +185,11 @@ void testLexerComplexExpression() {
   GW_ASSERT(tokens.get(0).getValue() == "x");
   GW_ASSERT(tokens.get(1).getType() == TokenType::EQUAL_OPERATOR);
   GW_ASSERT(tokens.get(1).getValue() == "=");
-  GW_ASSERT(tokens.get(2).getType() == TokenType::INT);
+  GW_ASSERT(tokens.get(2).getType() == TokenType::INT_TOKEN);
   GW_ASSERT(tokens.get(2).getValue() == "5");
   GW_ASSERT(tokens.get(3).getType() == TokenType::MATH_OPERATOR);
   GW_ASSERT(tokens.get(3).getValue() == "+");
-  GW_ASSERT(tokens.get(4).getType() == TokenType::INT);
+  GW_ASSERT(tokens.get(4).getType() == TokenType::INT_TOKEN);
   GW_ASSERT(tokens.get(4).getValue() == "3");
 }
 
