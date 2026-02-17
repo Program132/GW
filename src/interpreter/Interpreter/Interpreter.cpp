@@ -208,6 +208,10 @@ Value Interpreter::evaluate(Expression *expression) {
       }
       return Value(varName, &members);
     }
+    if (environment->classExist(varName)) {
+      // Return a Value representing the Class itself
+      return Value(VAL_CLASS, varName);
+    }
     throw std::runtime_error("Undefined variable '" + varName + "'");
   }
   case ASSIGN: {
@@ -587,9 +591,6 @@ Value Interpreter::evaluate(Expression *expression) {
         }
 
         return Value(name, &members);
-      } else {
-        throw std::runtime_error("Function, Class or Struct '" + name +
-                                 "' not defined");
       }
     } else if (calleeExpr->getType() == GET) {
       // Method call
@@ -597,90 +598,189 @@ Value Interpreter::evaluate(Expression *expression) {
       Value object = evaluate(getExpr->getObject());
       std::string methodName = getExpr->getName().getValue();
 
-      if (object.getType() != VAL_STRUCT) {
-        throw std::runtime_error("Only instances have methods.");
-      }
+      if (object.getType() == VAL_STRUCT) {
+        std::string className = object.structName;
 
-      std::string className = object.structName;
+        if (!environment->classExist(className)) {
+          throw std::runtime_error("Class '" + className + "' not found.");
+        }
 
-      if (!environment->classExist(className)) {
-        throw std::runtime_error("Class '" + className + "' not found.");
-      }
+        ClassDeclarationStatement *cls = environment->getClass(className);
 
-      ClassDeclarationStatement *cls = environment->getClass(className);
+        // Find method (instance or static? usually instance on instance)
+        FunctionDeclarationStatement *method = nullptr;
+        ClassDeclarationStatement *currentCls = cls;
 
-      // Find method
-      FunctionDeclarationStatement *method = nullptr;
-      ClassDeclarationStatement *currentCls = cls;
+        while (currentCls != nullptr && method == nullptr) {
+          for (int i = 0; i < currentCls->getMethods().size(); i++) {
+            if (currentCls->getMethods().get(i)->getName().getValue() ==
+                methodName) {
+              method = currentCls->getMethods().get(i);
+              break;
+            }
+          }
 
-      while (currentCls != nullptr && method == nullptr) {
-        for (int i = 0; i < currentCls->getMethods().size(); i++) {
-          if (currentCls->getMethods().get(i)->getName().getValue() ==
-              methodName) {
-            method = currentCls->getMethods().get(i);
-            break;
+          if (method == nullptr) {
+            if (currentCls->getSuperclass().getType() ==
+                TokenType::IDENTIFIER) {
+              std::string superName = currentCls->getSuperclass().getValue();
+              if (environment->classExist(superName)) {
+                currentCls = environment->getClass(superName);
+              } else {
+                break;
+              }
+            } else {
+              currentCls = nullptr;
+            }
           }
         }
 
         if (method == nullptr) {
-          if (currentCls->getSuperclass().getType() == TokenType::IDENTIFIER) {
-            std::string superName = currentCls->getSuperclass().getValue();
-            if (environment->classExist(superName)) {
-              currentCls = environment->getClass(superName);
-            } else {
-              break; // Or throw error, but we throw later if method not found
+          throw std::runtime_error("Method '" + methodName +
+                                   "' not found in class '" + className + "'.");
+        }
+
+        if (method->getIsStatic()) {
+          throw std::runtime_error("Cannot call static method '" + methodName +
+                                   "' on an instance.");
+        }
+
+        List<Expression *> argExprs =
+            ((CallExpression *)expression)->getArguments();
+        if (argExprs.size() != method->getParams().size()) {
+          throw std::runtime_error("Method '" + methodName + "' expects " +
+                                   std::to_string(method->getParams().size()) +
+                                   " arguments.");
+        }
+
+        List<Value> evaluatedArgs;
+        for (int i = 0; i < argExprs.size(); i++) {
+          evaluatedArgs.append(evaluate(argExprs.get(i)));
+        }
+
+        Environment *methodEnv = new Environment(environment);
+        methodEnv->addVariable("this", object, className);
+
+        for (int i = 0; i < evaluatedArgs.size(); i++) {
+          Token paramNameToken = method->getParams().get(i).get(1);
+          Token paramTypeToken = method->getParams().get(i).get(0);
+          methodEnv->addVariable(paramNameToken.getValue(),
+                                 evaluatedArgs.get(i),
+                                 paramTypeToken.getValue());
+        }
+
+        Environment *previousEnv = environment;
+        environment = methodEnv;
+
+        Value returnValue;
+        try {
+          BlockStatement *body = method->getBody();
+          for (int i = 0; i < body->getStatements().size(); i++) {
+            execute(body->getStatements().get(i));
+          }
+        } catch (const ReturnException &e) {
+          returnValue = e.value;
+        }
+
+        environment = previousEnv;
+        delete methodEnv;
+
+        return returnValue;
+      } else if (object.getType() == VAL_CLASS) {
+        std::string className =
+            object.asString(); // VAL_CLASS stores class name in stringValue?
+                               // Check Value.cpp constructor.
+        // Value(string value) sets VAL_STRING.
+        // We need to verify how VAL_CLASS is created.
+        // Assuming VAL_CLASS stores name in stringValue.
+
+        if (!environment->classExist(className)) {
+          throw std::runtime_error("Class '" + className + "' not found.");
+        }
+        ClassDeclarationStatement *cls = environment->getClass(className);
+
+        // Find static method
+        FunctionDeclarationStatement *method = nullptr;
+        // Static methods do not inherit? Or do they? In Java they do.
+        // Let's assume no inheritance for static first, or implement if easy.
+        // Inheritance makes sense.
+        ClassDeclarationStatement *currentCls = cls;
+        while (currentCls != nullptr && method == nullptr) {
+          for (int i = 0; i < currentCls->getMethods().size(); i++) {
+            if (currentCls->getMethods().get(i)->getName().getValue() ==
+                methodName) {
+              method = currentCls->getMethods().get(i);
+              break;
             }
-          } else {
-            currentCls = nullptr;
+          }
+          if (method == nullptr) {
+            if (currentCls->getSuperclass().getType() ==
+                TokenType::IDENTIFIER) {
+              std::string superName = currentCls->getSuperclass().getValue();
+              if (environment->classExist(superName)) {
+                currentCls = environment->getClass(superName);
+              } else {
+                break;
+              }
+            } else {
+              currentCls = nullptr;
+            }
           }
         }
-      }
 
-      if (method == nullptr) {
-        throw std::runtime_error("Method '" + methodName +
-                                 "' not found in class '" + className + "'.");
-      }
-
-      List<Expression *> argExprs =
-          ((CallExpression *)expression)->getArguments();
-      if (argExprs.size() != method->getParams().size()) {
-        throw std::runtime_error("Method '" + methodName + "' expects " +
-                                 std::to_string(method->getParams().size()) +
-                                 " arguments.");
-      }
-
-      List<Value> evaluatedArgs;
-      for (int i = 0; i < argExprs.size(); i++) {
-        evaluatedArgs.append(evaluate(argExprs.get(i)));
-      }
-
-      Environment *methodEnv = new Environment(environment);
-      methodEnv->addVariable("this", object, className);
-
-      for (int i = 0; i < evaluatedArgs.size(); i++) {
-        Token paramNameToken = method->getParams().get(i).get(1);
-        Token paramTypeToken = method->getParams().get(i).get(0);
-        methodEnv->addVariable(paramNameToken.getValue(), evaluatedArgs.get(i),
-                               paramTypeToken.getValue());
-      }
-
-      Environment *previousEnv = environment;
-      environment = methodEnv;
-
-      Value returnValue;
-      try {
-        BlockStatement *body = method->getBody();
-        for (int i = 0; i < body->getStatements().size(); i++) {
-          execute(body->getStatements().get(i));
+        if (method == nullptr) {
+          throw std::runtime_error("Static method '" + methodName +
+                                   "' not found in class '" + className + "'.");
         }
-      } catch (const ReturnException &e) {
-        returnValue = e.value;
+
+        if (!method->getIsStatic()) {
+          throw std::runtime_error("Method '" + methodName +
+                                   "' is not static.");
+        }
+
+        List<Expression *> argExprs =
+            ((CallExpression *)expression)->getArguments();
+        if (argExprs.size() != method->getParams().size()) {
+          throw std::runtime_error("Method '" + methodName + "' expects " +
+                                   std::to_string(method->getParams().size()) +
+                                   " arguments.");
+        }
+
+        List<Value> evaluatedArgs;
+        for (int i = 0; i < argExprs.size(); i++) {
+          evaluatedArgs.append(evaluate(argExprs.get(i)));
+        }
+
+        Environment *methodEnv = new Environment(environment);
+        // No 'this' for static methods!
+
+        for (int i = 0; i < evaluatedArgs.size(); i++) {
+          Token paramNameToken = method->getParams().get(i).get(1);
+          Token paramTypeToken = method->getParams().get(i).get(0);
+          methodEnv->addVariable(paramNameToken.getValue(),
+                                 evaluatedArgs.get(i),
+                                 paramTypeToken.getValue());
+        }
+
+        Environment *previousEnv = environment;
+        environment = methodEnv;
+
+        Value returnValue;
+        try {
+          BlockStatement *body = method->getBody();
+          for (int i = 0; i < body->getStatements().size(); i++) {
+            execute(body->getStatements().get(i));
+          }
+        } catch (const ReturnException &e) {
+          returnValue = e.value;
+        }
+        environment = previousEnv;
+        delete methodEnv;
+        return returnValue;
+
+      } else {
+        throw std::runtime_error("Only instances or classes have methods.");
       }
-
-      environment = previousEnv;
-      delete methodEnv;
-
-      return returnValue;
 
     } else {
       throw std::runtime_error(
