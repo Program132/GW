@@ -60,10 +60,10 @@ inline std::string tokenTypeToString(TokenType type) {
     return "NULL_TOKEN";
   case EXTENDS:
     return "EXTENDS";
-  case STATIC_KEYWORD:
-    return "STATIC_KEYWORD";
   case OPERATOR:
     return "OPERATOR";
+  case STATIC_KEYWORD:
+    return "STATIC_KEYWORD";
   case MATH_OPERATOR:
     return "MATH_OPERATOR";
   case EQUAL_OPERATOR:
