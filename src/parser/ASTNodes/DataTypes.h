@@ -4,7 +4,7 @@
 #include "../../lexer/Token/Token.h"
 #include <string>
 
-enum DataTypes { Null, Int, Number, Boolean, String };
+enum DataTypes { Null, Int, Number, Boolean, String, Char };
 
 DataTypes toDataTypes(Token token);
 std::string fromDataTypes(DataTypes dataType);
