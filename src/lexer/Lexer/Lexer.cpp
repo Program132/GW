@@ -8,6 +8,18 @@ void Lexer::appendToken() {
   TokenType type = this->current.getType();
   std::string value = this->current.getValue();
 
+  if (value.size() > 1 && type == TokenType::CHAR) {
+    this->current.setType(TokenType::STRING);
+    this->tokens.append(this->current);
+    this->current = Token();
+    return;
+  } else if ((value.size() == 0 || value.size() == 1) &&
+             type == TokenType::CHAR) {
+    this->tokens.append(this->current);
+    this->current = Token();
+    return;
+  }
+
   if (type == TokenType::IDENTIFIER && (value == "true" || value == "false")) {
     this->current.setType(TokenType::BOOLEAN);
     this->tokens.append(this->current);
@@ -102,6 +114,16 @@ void Lexer::lex() {
         this->current.setLine(line);
       } else if (this->current.getType() == TokenType::POSSIBLE_STRING) {
         this->current.setType(TokenType::STRING);
+        this->appendToken();
+      }
+    }
+
+    else if (c == '\'') {
+      if (this->current.getType() == TokenType::WHITESPACE) {
+        this->current.setType(TokenType::POSSIBLE_CHAR);
+        this->current.setLine(line);
+      } else if (this->current.getType() == TokenType::POSSIBLE_CHAR) {
+        this->current.setType(TokenType::CHAR);
         this->appendToken();
       }
     }
