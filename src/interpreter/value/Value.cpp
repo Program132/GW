@@ -23,6 +23,10 @@ Value::Value(const char *value)
     : type(VAL_STRING), intValue(0), stringValue(value), structMembers(nullptr),
       structName("") {}
 
+Value::Value(char value)
+    : type(VAL_CHAR), charValue(value), structMembers(nullptr), structName("") {
+}
+
 Value::Value(bool value)
     : type(VAL_BOOLEAN), boolValue(value), structMembers(nullptr),
       structName("") {}
@@ -47,6 +51,9 @@ Value::Value(const Value &other)
     break;
   case VAL_BOOLEAN:
     boolValue = other.boolValue;
+    break;
+  case VAL_CHAR:
+    charValue = other.charValue;
     break;
   case VAL_STRUCT:
     // Shared pointer already copied in initializer list
@@ -80,6 +87,9 @@ Value &Value::operator=(const Value &other) {
       break;
     case VAL_BOOLEAN:
       boolValue = other.boolValue;
+      break;
+    case VAL_CHAR:
+      charValue = other.charValue;
       break;
     default:
       intValue = 0;
@@ -124,6 +134,12 @@ bool Value::asBool() const {
   throw std::runtime_error("Value is not a boolean");
 }
 
+char Value::asChar() const {
+  if (type == VAL_CHAR)
+    return charValue;
+  throw std::runtime_error("Value is not a character");
+}
+
 bool Value::isInt() const { return type == VAL_INTEGER; }
 
 bool Value::isDouble() const { return type == VAL_NUMBER; }
@@ -131,6 +147,8 @@ bool Value::isDouble() const { return type == VAL_NUMBER; }
 bool Value::isString() const { return type == VAL_STRING; }
 
 bool Value::isBool() const { return type == VAL_BOOLEAN; }
+
+bool Value::isChar() const { return type == VAL_CHAR; }
 
 bool Value::isNull() const { return type == VAL_NULL; }
 
@@ -154,6 +172,8 @@ std::string Value::toString() const {
     return stringValue;
   case VAL_BOOLEAN:
     return boolValue ? "true" : "false";
+  case VAL_CHAR:
+    return std::string(1, charValue);
   case VAL_NULL:
     return "null";
   default:
@@ -175,6 +195,15 @@ double Value::toNumber() const {
 Value Value::operator+(const Value &other) const {
   if (this->isString() && other.isString()) {
     return Value(this->asString() + other.asString());
+  }
+  if (this->isString() && other.isString()) {
+    return Value(this->asString() + other.asString());
+  }
+  if (this->isString() && other.isChar()) {
+    return Value(this->asString() + other.asChar());
+  }
+  if (this->isChar() && other.isString()) {
+    return Value(this->asChar() + other.asString());
   }
   if (this->isString()) {
     return Value(this->asString() + other.toString());
@@ -291,6 +320,8 @@ bool Value::operator==(const Value &other) const {
     return this->asString() == other.asString();
   case VAL_BOOLEAN:
     return this->asBool() == other.asBool();
+  case VAL_CHAR:
+    return this->asChar() == other.asChar();
   case VAL_NULL:
     return true;
   default:

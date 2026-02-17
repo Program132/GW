@@ -2,7 +2,7 @@
 #define VALUE_H
 
 #include <map>
-#include <memory> // Added for std::shared_ptr
+#include <memory>
 #include <string>
 
 enum ValueType {
@@ -12,7 +12,8 @@ enum ValueType {
   VAL_STRING,
   VAL_BOOLEAN,
   VAL_STRUCT,
-  VAL_CLASS
+  VAL_CLASS,
+  VAL_CHAR
 };
 
 class Value {
@@ -22,6 +23,7 @@ private:
     int intValue;
     double doubleValue;
     bool boolValue;
+    char charValue;
   };
   std::string stringValue;
   std::shared_ptr<std::map<std::string, Value>> structMembers;
@@ -36,6 +38,7 @@ public:
   Value(double value);
   Value(const std::string &value);
   Value(const char *value);
+  Value(char value);
   Value(bool value);
   Value(std::string structName, std::map<std::string, Value> *members);
 
@@ -52,20 +55,19 @@ public:
   double asDouble() const;
   std::string asString() const;
   bool asBool() const;
+  char asChar() const;
 
-  // Vérifications de type
   bool isInt() const;
   bool isDouble() const;
   bool isString() const;
   bool isBool() const;
+  bool isChar() const;
   bool isNull() const;
-  bool isNumber() const; // Int ou Double
+  bool isNumber() const;
 
-  // Conversions
   std::string toString() const;
   double toNumber() const;
 
-  // Opérations arithmétiques
   Value operator+(const Value &other) const;
   Value operator-(const Value &other) const;
   Value operator*(const Value &other) const;
@@ -73,7 +75,6 @@ public:
   Value operator%(const Value &other) const;
   Value pow(const Value &other) const;
 
-  // Opérations de comparaison
   bool operator==(const Value &other) const;
   bool operator!=(const Value &other) const;
   bool operator<(const Value &other) const;
@@ -81,7 +82,6 @@ public:
   bool operator<=(const Value &other) const;
   bool operator>=(const Value &other) const;
 
-  // Opérateur unaire
   Value operator-() const;
   Value operator+() const;
 };
