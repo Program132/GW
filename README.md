@@ -108,7 +108,7 @@ Windows:
 ```powershell
 git clone https://github.com/Program132/GW.git
 cd GW
-build.bat
+.\build.bat
 ```
 
 Linux:
