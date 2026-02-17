@@ -8,20 +8,20 @@ void Lexer::appendToken() {
   TokenType type = this->current.getType();
   std::string value = this->current.getValue();
 
-  if (value.size() > 1 && type == TokenType::CHAR) {
+  if (value.size() > 1 && type == TokenType::CHAR_TOKEN) {
     this->current.setType(TokenType::STRING);
     this->tokens.append(this->current);
     this->current = Token();
     return;
   } else if ((value.size() == 0 || value.size() == 1) &&
-             type == TokenType::CHAR) {
+             type == TokenType::CHAR_TOKEN) {
     this->tokens.append(this->current);
     this->current = Token();
     return;
   }
 
   if (type == TokenType::IDENTIFIER && (value == "true" || value == "false")) {
-    this->current.setType(TokenType::BOOLEAN);
+    this->current.setType(TokenType::BOOLEAN_TOKEN);
     this->tokens.append(this->current);
     this->current = Token();
     return;
@@ -83,15 +83,15 @@ void Lexer::lex() {
     // Integer / Number Management :
     if (this->isDigit(c)) {
       if (this->current.getType() == TokenType::WHITESPACE) {
-        this->current.setType(TokenType::INT);
+        this->current.setType(TokenType::INT_TOKEN);
         this->current.setLine(line);
         this->current.appendCharacter(c);
       } else {
         this->current.appendCharacter(c);
       }
     } else if (c == '.') {
-      if (this->current.getType() == TokenType::INT) {
-        this->current.setType(TokenType::NUMBER);
+      if (this->current.getType() == TokenType::INT_TOKEN) {
+        this->current.setType(TokenType::NUMBER_TOKEN);
         this->current.appendCharacter(c);
       } else if (this->current.getType() == TokenType::POSSIBLE_STRING) {
         this->current.appendCharacter(c);
@@ -183,7 +183,7 @@ void Lexer::lex() {
         this->current.setType(TokenType::POSSIBLE_CHAR);
         this->current.setLine(line);
       } else if (this->current.getType() == TokenType::POSSIBLE_CHAR) {
-        this->current.setType(TokenType::CHAR);
+        this->current.setType(TokenType::CHAR_TOKEN);
         this->appendToken();
       }
     }

@@ -9,13 +9,13 @@ enum TokenType {
   IDENTIFIER,
   COMMENT,
 
-  INT,
-  NUMBER,
-  BOOLEAN,
+  INT_TOKEN,
+  NUMBER_TOKEN,
+  BOOLEAN_TOKEN,
   POSSIBLE_STRING,
   STRING,
   POSSIBLE_CHAR,
-  CHAR,
+  CHAR_TOKEN,
   NULL_TOKEN,
 
   EXTENDS,
@@ -46,11 +46,11 @@ inline std::string tokenTypeToString(TokenType type) {
     return "IDENTIFIER";
   case COMMENT:
     return "COMMENT";
-  case INT:
+  case INT_TOKEN:
     return "INT";
-  case NUMBER:
+  case NUMBER_TOKEN:
     return "NUMBER";
-  case BOOLEAN:
+  case BOOLEAN_TOKEN:
     return "BOOLEAN";
   case POSSIBLE_STRING:
     return "POSSIBLE_STRING";
