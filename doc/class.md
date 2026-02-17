@@ -62,6 +62,40 @@ operator +(val: Number) {
 }
 ```
 
+## Inheritance
+
+GW supports single inheritance using the `extends` keyword. A subclass inherits all fields and methods from its parent class.
+
+```kotlin
+class Animal {
+    name: String
+
+    constructor(name: String) {
+        this.name = name;
+    }
+
+    func speak() {
+        print("Generic animal sound");
+    }
+}
+
+class Dog extends Animal {
+    breed: String
+
+    constructor(name: String, breed: String) {
+        this.name = name;
+        this.breed = breed;
+    }
+
+    func speak() {
+        print("Woof!");
+    }
+}
+```
+
+The `Dog` class inherits `name` from `Animal` and adds its own field `breed`. It also overrides the `speak` method. 
+If a method is not found in the subclass, GW will look for it in the parent class.
+
 ## Full Example
 
 Here is a full example using a `Point` class with multiple constructors and operator overloading:
