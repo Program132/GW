@@ -3,6 +3,10 @@ project(GW)
 
 set(CMAKE_CXX_STANDARD 26)
 
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE TESTS "tests/*.cpp")
 add_executable(GW main.cpp ${SOURCES} ${TESTS})
