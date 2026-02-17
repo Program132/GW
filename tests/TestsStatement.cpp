@@ -60,8 +60,9 @@ void testStatement() {
   List<List<Token>> emptyParams;
   List<Statement *> funcStmts;
   funcStmts.append(new PrintStatement(new LiteralExpression(num100)));
-  FunctionDeclarationStatement func1(
-      nameVar, emptyParams, new BlockStatement(funcStmts), DataTypes::Int);
+  FunctionDeclarationStatement func1(nameVar, emptyParams,
+                                     new BlockStatement(funcStmts),
+                                     DataTypes::Int, false);
   GW_ASSERT(func1.getReturnType() == DataTypes::Int);
   GW_ASSERT(func1.getParams().size() == 0);
 
