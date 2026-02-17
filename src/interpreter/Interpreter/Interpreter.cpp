@@ -507,20 +507,32 @@ Value Interpreter::evaluate(Expression *expression) {
         }
 
         std::map<std::string, Value> members;
-        // Init fields with default Null
-        for (int i = 0; i < cls->getFields().size(); i++) {
-          List<Token> field = cls->getFields().get(i);
-          std::string fieldName = field.get(1).getValue();
-          members[fieldName] = Value();
+
+        // Init fields with default Null, including superclasses
+        ClassDeclarationStatement *currentCls = cls;
+        while (currentCls != nullptr) {
+          for (int i = 0; i < currentCls->getFields().size(); i++) {
+            List<Token> field = currentCls->getFields().get(i);
+            std::string fieldName = field.get(1).getValue();
+            if (members.find(fieldName) == members.end()) {
+              members[fieldName] = Value();
+            }
+          }
+
+          if (currentCls->getSuperclass().getType() == TokenType::IDENTIFIER) {
+            std::string superName = currentCls->getSuperclass().getValue();
+            if (environment->classExist(superName)) {
+              currentCls = environment->getClass(superName);
+            } else {
+              throw std::runtime_error("Superclass '" + superName +
+                                       "' not found");
+            }
+          } else {
+            currentCls = nullptr;
+          }
         }
 
-        Value instance(name,
-                       &members); // Assuming Value allows mapping instance
-        // Need to set type to VAL_CLASS if constructor allows or logic handles
-        // it. Wait, Value constructor sets typ based on args? Value(string,
-        // map*) sets VAL_STRUCT. Can I differentiate? Value class might need
-        // update to support setting VAL_CLASS. Or treat VAL_STRUCT as generic
-        // Object. Let's use VAL_STRUCT for now as Value.cpp handles it.
+        Value instance(name, &members);
 
         if (constructor != nullptr) {
           List<Value> evaluatedArgs;
@@ -529,7 +541,7 @@ Value Interpreter::evaluate(Expression *expression) {
           }
 
           Environment *ctorEnv = new Environment(environment);
-          ctorEnv->addVariable("this", instance, name);
+          ctorEnv->addVariable("this", instance, name); // Allow binding 'this'
 
           for (int i = 0; i < evaluatedArgs.size(); i++) {
             Token paramNameToken = constructor->getParams().get(i).get(1);
@@ -549,8 +561,6 @@ Value Interpreter::evaluate(Expression *expression) {
               execute(body->getStatements().get(i));
             }
           } catch (const ReturnException &e) {
-            // Constructors shouldn't return value, but if they do, ignore or
-            // error?
           }
 
           environment = previousEnv;
@@ -601,10 +611,28 @@ Value Interpreter::evaluate(Expression *expression) {
 
       // Find method
       FunctionDeclarationStatement *method = nullptr;
-      for (int i = 0; i < cls->getMethods().size(); i++) {
-        if (cls->getMethods().get(i)->getName().getValue() == methodName) {
-          method = cls->getMethods().get(i);
-          break;
+      ClassDeclarationStatement *currentCls = cls;
+
+      while (currentCls != nullptr && method == nullptr) {
+        for (int i = 0; i < currentCls->getMethods().size(); i++) {
+          if (currentCls->getMethods().get(i)->getName().getValue() ==
+              methodName) {
+            method = currentCls->getMethods().get(i);
+            break;
+          }
+        }
+
+        if (method == nullptr) {
+          if (currentCls->getSuperclass().getType() == TokenType::IDENTIFIER) {
+            std::string superName = currentCls->getSuperclass().getValue();
+            if (environment->classExist(superName)) {
+              currentCls = environment->getClass(superName);
+            } else {
+              break; // Or throw error, but we throw later if method not found
+            }
+          } else {
+            currentCls = nullptr;
+          }
         }
       }
 
