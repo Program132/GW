@@ -69,7 +69,7 @@ public:
   }
 
   void addVariable(const std::string &name, const Value &value,
-                   const std::string &type) {
+                   const std::string &type = "Unknown") {
     variables[name] = value;
     variableTypes[name] = type;
   }
