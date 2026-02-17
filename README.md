@@ -26,9 +26,14 @@ Currently an high-performance interpreted language, GW is evolving towards nativ
 See how clean object-oriented programming can be in GW:
 
 ```kotlin
+struct Vec2 {
+    x: Number,
+    y: Number
+}
+
 class Point {
     x: Number,
-    y: Number 
+    y: Number
 
     constructor(x: Number, y: Number) {
         this.x = x;
@@ -37,27 +42,47 @@ class Point {
 
     constructor(x: Number) {
         this.x = x;
-        this.y = 0;
+        this.y = x;
+    }
+
+    func add(p1: Point, p2: Point) -> Point {
+        return Point(p1.x + p2.x, p1.y + p2.y);
+    }
+
+    func add2(v: Vec2) -> Integer {
+        this.x += v.x;
+        this.y += v.y;
+        return 0;
     }
 
     func str() -> String {
         return "(" + this.x + ", " + this.y + ")";
     }
-  
-    operator +(other: Point) {
-        return Point(this.x + other.x, this.y + other.y);
+
+    operator +(p1: Point, p2: Point) {
+        return Point(p1.x + p2.x, p1.y + p2.y);
     }
 
-    operator +(a: Integer) {
-        return Point(this.x + a, this.y + a);
+    operator +(p1: Point, a: Number) {
+        return Point(p1.x + a, p1.y + a);
     }
 }
 
 var p = Point(1, 2);
-var q = Point(3, 4);
+var p2 = Point(3, 4);
+var p3 = p2.add(p, p2);
 
-println("Vector Addition: " + (p + q).str()); # -> (4, 6)
-println("Point + Scalar:  " + (p + 5).str()); # -> (6, 7)
+println(p3.str());
+
+var v = Vec2(5, 5);
+p2.add2(v);
+println(p2.str());
+
+var p4 = p + p2;
+println(p4.str());
+
+var p5 = p + 5;
+println(p5.str());
 ```
 
 ---

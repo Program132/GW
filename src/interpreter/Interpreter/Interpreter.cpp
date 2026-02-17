@@ -331,6 +331,70 @@ Value Interpreter::evaluate(Expression *expression) {
 
               return returnValue;
             }
+          } else if (opDecl->getParams().size() == 2) {
+            std::string leftParamType =
+                opDecl->getParams().get(0).get(0).getValue();
+            std::string rightParamType =
+                opDecl->getParams().get(1).get(0).getValue();
+
+            // Check if first param matches 'this' struct type (left operand)
+            if (leftParamType != left.structName) {
+              continue;
+            }
+
+            bool match = false;
+            // Check right param compatibility
+            if (rightParamType == "Int" || rightParamType == "Integer") {
+              if (right.isInt())
+                match = true;
+            } else if (rightParamType == "Number") {
+              if (right.isNumber())
+                match = true;
+            } else if (rightParamType == "String") {
+              if (right.isString())
+                match = true;
+            } else if (rightParamType == "Boolean") {
+              if (right.isBool())
+                match = true;
+            } else if (right.getType() == VAL_STRUCT &&
+                       right.structName == rightParamType) {
+              match = true;
+            }
+
+            if (match) {
+              Environment *opEnv = new Environment(environment);
+              opEnv->addVariable("this", left, left.structName);
+
+              // Param 1 -> Left (also 'this', but named as param)
+              Token leftParamName = opDecl->getParams().get(0).get(1);
+              Token leftParamTypeToken = opDecl->getParams().get(0).get(0);
+              opEnv->addVariable(leftParamName.getValue(), left,
+                                 leftParamTypeToken.getValue());
+
+              // Param 2 -> Right
+              Token rightParamName = opDecl->getParams().get(1).get(1);
+              Token rightParamTypeToken = opDecl->getParams().get(1).get(0);
+              opEnv->addVariable(rightParamName.getValue(), right,
+                                 rightParamTypeToken.getValue());
+
+              Environment *previousEnv = environment;
+              environment = opEnv;
+
+              Value returnValue;
+              try {
+                for (int j = 0; j < opDecl->getBody()->getStatements().size();
+                     j++) {
+                  execute(opDecl->getBody()->getStatements().get(j));
+                }
+              } catch (const ReturnException &e) {
+                returnValue = e.value;
+              }
+
+              environment = previousEnv;
+              delete opEnv;
+
+              return returnValue;
+            }
           }
         }
       }
@@ -494,8 +558,27 @@ Value Interpreter::evaluate(Expression *expression) {
         }
 
         return instance;
+      } else if (environment->structExist(name)) {
+        StructDeclarationStatement *str = environment->getStruct(name);
+        List<Expression *> argExprs =
+            ((CallExpression *)expression)->getArguments();
+
+        if (argExprs.size() != str->getFields().size()) {
+          throw std::runtime_error("Struct '" + name + "' expects " +
+                                   std::to_string(str->getFields().size()) +
+                                   " arguments.");
+        }
+
+        std::map<std::string, Value> members;
+        for (int i = 0; i < str->getFields().size(); i++) {
+          List<Token> field = str->getFields().get(i);
+          std::string fieldName = field.get(1).getValue();
+          members[fieldName] = evaluate(argExprs.get(i));
+        }
+
+        return Value(name, &members);
       } else {
-        throw std::runtime_error("Function or Class '" + name +
+        throw std::runtime_error("Function, Class or Struct '" + name +
                                  "' not defined");
       }
     } else if (calleeExpr->getType() == GET) {
