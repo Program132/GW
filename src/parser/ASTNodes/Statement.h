@@ -143,14 +143,19 @@ private:
 
 public:
   FunctionDeclarationStatement(Token name, List<List<Token>> params,
-                               BlockStatement *body, DataTypes returnType);
+                               BlockStatement *body, DataTypes returnType,
+                               bool isStatic);
   FunctionDeclarationStatement(Token name, List<List<Token>> params,
-                               BlockStatement *body);
+                               BlockStatement *body, bool isStatic);
 
   Token getName() const;
   List<List<Token>> getParams() const;
   BlockStatement *getBody() const;
   DataTypes getReturnType() const;
+  bool getIsStatic() const;
+
+private:
+  bool isStatic;
 };
 
 class ReturnStatement : public Statement {

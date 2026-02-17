@@ -155,14 +155,14 @@ Statement *ForStatement::getBody() const { return body; }
 
 FunctionDeclarationStatement::FunctionDeclarationStatement(
     Token name, List<List<Token>> params, BlockStatement *body,
-    DataTypes returnType)
+    DataTypes returnType, bool isStatic)
     : Statement(FUNCTION_DECLARATION, name), name(name), params(params),
-      body(body), returnType(returnType) {}
+      body(body), returnType(returnType), isStatic(isStatic) {}
 
 FunctionDeclarationStatement::FunctionDeclarationStatement(
-    Token name, List<List<Token>> params, BlockStatement *body)
+    Token name, List<List<Token>> params, BlockStatement *body, bool isStatic)
     : Statement(FUNCTION_DECLARATION, name), name(name), params(params),
-      body(body) {}
+      body(body), isStatic(isStatic) {}
 
 Token FunctionDeclarationStatement::getName() const { return name; }
 
@@ -175,6 +175,8 @@ BlockStatement *FunctionDeclarationStatement::getBody() const { return body; }
 DataTypes FunctionDeclarationStatement::getReturnType() const {
   return returnType;
 }
+
+bool FunctionDeclarationStatement::getIsStatic() const { return isStatic; }
 
 ReturnStatement::ReturnStatement() : Statement(RETURN) {}
 
