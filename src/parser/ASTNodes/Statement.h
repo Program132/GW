@@ -202,6 +202,7 @@ public:
 class ClassDeclarationStatement : public Statement {
 private:
   Token name;
+  Token superclass;
   List<List<Token>> fields;
   List<FunctionDeclarationStatement *> methods;
   List<ConstructorDeclarationStatement *> constructors;
@@ -209,12 +210,13 @@ private:
 
 public:
   ClassDeclarationStatement(
-      Token name, List<List<Token>> fields,
+      Token name, Token superclass, List<List<Token>> fields,
       List<FunctionDeclarationStatement *> methods,
       List<ConstructorDeclarationStatement *> constructors,
       List<OperatorDeclarationStatement *> operators);
 
   Token getName() const;
+  Token getSuperclass() const;
   List<List<Token>> getFields() const;
   List<FunctionDeclarationStatement *> getMethods() const;
   List<ConstructorDeclarationStatement *> getConstructors() const;
