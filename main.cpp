@@ -13,6 +13,14 @@
 #include "src/lexer/Lexer/Lexer.h"
 #include "src/parser/Parser/Parser.h"
 
+#include "src/native/functions/Time.h"
+
+void registerNatives(Interpreter &interpreter) {
+  interpreter.addNativeFunction("__native_time", __nativeTime);
+  interpreter.addNativeFunction("__native_sleep", __nativeSleep);
+  interpreter.addNativeFunction("__native_ctime", __nativeCTime);
+}
+
 void runAllTests() {
   try {
     std::cout << "Running tests..." << std::endl;
@@ -130,6 +138,9 @@ int main(int argc, char *argv[]) {
       Parser parser(lex.getTokens());
       parser.parse();
       Interpreter interpreter(parser.getStatements());
+
+      registerNatives(interpreter);
+
       interpreter.interpret();
     } catch (const std::exception &e) {
       std::cerr << "Error: " << e.what() << std::endl;
@@ -156,6 +167,9 @@ int main(int argc, char *argv[]) {
         Parser p(lex.getTokens());
         p.parse();
         Interpreter interp(p.getStatements());
+
+        registerNatives(interp);
+
         interp.interpret();
         std::cout << std::endl;
       } catch (const std::exception &e) {
