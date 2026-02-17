@@ -21,6 +21,11 @@ List<Statement *> Interpreter::getStatements() const { return statements; }
 
 Environment *Interpreter::getEnvironment() const { return environment; }
 
+void Interpreter::addNativeFunction(std::string name, NativeFunction func) {
+  environment->addVariable(name, Value(func),
+                           "native"); // type "native" or implicit
+}
+
 void Interpreter::interpret() {
   for (int i = 0; i < statements.size(); i++) {
     execute(statements.get(i));
@@ -591,7 +596,19 @@ Value Interpreter::evaluate(Expression *expression) {
         }
 
         return Value(name, &members);
+      } else if (environment->variableExist(name)) {
+        Value val = environment->getVariableValue(name);
+        if (val.getType() == VAL_NATIVE_FUNCTION) {
+          List<Expression *> argExprs =
+              ((CallExpression *)expression)->getArguments();
+          std::vector<Value> evaluatedArgs;
+          for (int i = 0; i < argExprs.size(); i++) {
+            evaluatedArgs.push_back(evaluate(argExprs.get(i)));
+          }
+          return val.asNativeFunction()(evaluatedArgs);
+        }
       }
+
     } else if (calleeExpr->getType() == GET) {
       // Method call
       GetExpression *getExpr = (GetExpression *)calleeExpr;
@@ -832,14 +849,14 @@ Value Interpreter::tokenToValue(const Token &token) {
   std::string value = token.getValue();
 
   switch (tokenType) {
-  case TokenType::INT: {
+  case TokenType::INT_TOKEN: {
     try {
       return Value(std::stoi(value));
     } catch (...) {
       throw std::runtime_error("Invalid integer: " + value);
     }
   }
-  case TokenType::NUMBER: {
+  case TokenType::NUMBER_TOKEN: {
     try {
       return Value(std::stod(value));
     } catch (...) {
@@ -848,9 +865,9 @@ Value Interpreter::tokenToValue(const Token &token) {
   }
   case TokenType::STRING:
     return Value(value);
-  case TokenType::BOOLEAN:
+  case TokenType::BOOLEAN_TOKEN:
     return Value(value == "true");
-  case TokenType::CHAR:
+  case TokenType::CHAR_TOKEN:
     if (value.length() > 0) {
       return Value(value[0]);
     }

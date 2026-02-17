@@ -23,6 +23,7 @@ public:
   void interpret();
   void execute(Statement *statement);
   Value evaluate(Expression *expression);
+  void addNativeFunction(std::string name, NativeFunction func);
 };
 
 #endif
