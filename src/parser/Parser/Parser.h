@@ -49,7 +49,8 @@ public:
   PrintStatement *printStatement();
   PrintlnStatement *printlnStatement();
   VarDeclarationStatement *varDeclarationStatement();
-  FunctionDeclarationStatement *functionDeclarationStatement();
+  FunctionDeclarationStatement *
+  functionDeclarationStatement(bool isStatic = false);
   ReturnStatement *returnStatement();
   BreakStatement *breakStatement();
   ContinueStatement *continueStatement();

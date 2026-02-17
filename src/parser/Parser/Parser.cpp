@@ -356,7 +356,8 @@ VarDeclarationStatement *Parser::varDeclarationStatement() {
   return new VarDeclarationStatement(name, initializer);
 }
 
-FunctionDeclarationStatement *Parser::functionDeclarationStatement() {
+FunctionDeclarationStatement *
+Parser::functionDeclarationStatement(bool isStatic) {
   this->advance(); // consume 'func'
 
   if (!this->checkType(TokenType::IDENTIFIER)) {
@@ -404,7 +405,8 @@ FunctionDeclarationStatement *Parser::functionDeclarationStatement() {
 
   BlockStatement *block = this->blockStatement();
 
-  return new FunctionDeclarationStatement(name, parameters, block, returnType);
+  return new FunctionDeclarationStatement(name, parameters, block, returnType,
+                                          isStatic);
 }
 
 ReturnStatement *Parser::returnStatement() {
@@ -580,13 +582,35 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
   List<OperatorDeclarationStatement *> operators;
 
   while (!this->checkOperator("}") && !this->isAtEnd()) {
+    bool isStatic = false;
+    if (this->checkType(TokenType::STATIC_KEYWORD)) {
+      this->advance();
+      isStatic = true;
+    } else if (this->checkType(TokenType::IDENTIFIER) &&
+               peek().getValue() == "static") {
+      this->advance();
+      isStatic = true;
+    }
+
     if (this->checkIdentifier("func")) {
-      methods.append(this->functionDeclarationStatement());
+      methods.append(this->functionDeclarationStatement(isStatic));
     } else if (this->checkIdentifier("constructor")) {
+      if (isStatic)
+        throw std::runtime_error("Constructor cannot be static");
       constructors.append(this->constructorDeclarationStatement());
     } else if (this->checkIdentifier("operator")) {
+      if (isStatic)
+        throw std::runtime_error("Operator cannot be static");
       operators.append(this->operatorDeclarationStatement());
     } else {
+      if (isStatic) {
+        // Static fields logic?
+        // For now user requested static methods. Fields maybe later.
+        // Let's implement static fields too if easy.
+        // But strict adherence: "method en static".
+        // If isStatic is true here, and we fall through to field parsing...
+      }
+
       if (!this->checkType(TokenType::IDENTIFIER)) {
         throw std::runtime_error("Expected field or method declaration line " +
                                  std::to_string(peek().getLine()));
