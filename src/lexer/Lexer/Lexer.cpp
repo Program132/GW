@@ -34,6 +34,13 @@ void Lexer::appendToken() {
     return;
   }
 
+  if (type == TokenType::IDENTIFIER && value == "extends") {
+    this->current.setType(TokenType::EXTENDS);
+    this->tokens.append(this->current);
+    this->current = Token();
+    return;
+  }
+
   if (type == TokenType::WHITESPACE || type == TokenType::COMMENT) {
     this->current = Token();
     return;
@@ -110,6 +117,45 @@ void Lexer::lex() {
         this->appendToken();
         this->current = Token(TokenType::COMMENT, std::string(1, c), line);
       } else {
+        this->current.appendCharacter(c);
+      }
+    }
+
+    // Escape character Management :
+    else if (c == '\\') {
+      if (this->current.getType() == TokenType::POSSIBLE_STRING ||
+          this->current.getType() == TokenType::POSSIBLE_CHAR) {
+        if (i + 1 < this->code.length()) {
+          char nextConst = this->code[i + 1];
+          if (nextConst == 'n') {
+            this->current.appendCharacter('\n');
+            i++;
+          } else if (nextConst == 't') {
+            this->current.appendCharacter('\t');
+            i++;
+          } else if (nextConst == 'r') {
+            this->current.appendCharacter('\r');
+            i++;
+          } else if (nextConst == '"') {
+            this->current.appendCharacter('"');
+            i++;
+          } else if (nextConst == '\'') {
+            this->current.appendCharacter('\'');
+            i++;
+          } else if (nextConst == '\\') {
+            this->current.appendCharacter('\\');
+            i++;
+          } else {
+            this->current.appendCharacter(c);
+          }
+        } else {
+          this->current.appendCharacter(c);
+        }
+      } else {
+        if (this->current.getType() == TokenType::WHITESPACE) {
+          this->current.setType(TokenType::IDENTIFIER);
+          this->current.setLine(line);
+        }
         this->current.appendCharacter(c);
       }
     }
