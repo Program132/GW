@@ -43,6 +43,10 @@ Value::Value(ValueType type, const std::string &value)
   }
 }
 
+Value::Value(NativeFunction func)
+    : type(VAL_NATIVE_FUNCTION), intValue(0), structName(""), nativeFunc(func) {
+}
+
 Value::Value(const Value &other)
     : type(other.type), structMembers(other.structMembers),
       structName(other.structName) {
@@ -66,6 +70,9 @@ Value::Value(const Value &other)
   case VAL_STRUCT:
     // Shared pointer already copied in initializer list
     break;
+  case VAL_NATIVE_FUNCTION:
+    nativeFunc = other.nativeFunc;
+    break;
   default:
     intValue = 0;
     break;
@@ -74,7 +81,7 @@ Value::Value(const Value &other)
 
 Value &Value::operator=(const Value &other) {
   if (this != &other) {
-    if (type == VAL_STRING) {
+    if (type == VAL_STRING || type == VAL_CLASS) {
       stringValue.~basic_string();
     }
     // structMembers handled by shared_ptr assignment below
@@ -99,6 +106,9 @@ Value &Value::operator=(const Value &other) {
       break;
     case VAL_CHAR:
       charValue = other.charValue;
+      break;
+    case VAL_NATIVE_FUNCTION:
+      nativeFunc = other.nativeFunc;
       break;
     default:
       intValue = 0;
@@ -151,6 +161,12 @@ char Value::asChar() const {
   throw std::runtime_error("Value is not a character");
 }
 
+NativeFunction Value::asNativeFunction() const {
+  if (type == VAL_NATIVE_FUNCTION)
+    return nativeFunc;
+  throw std::runtime_error("Value is not a native function");
+}
+
 bool Value::isInt() const { return type == VAL_INTEGER; }
 
 bool Value::isDouble() const { return type == VAL_NUMBER; }
@@ -166,6 +182,8 @@ bool Value::isNull() const { return type == VAL_NULL; }
 bool Value::isNumber() const {
   return type == VAL_INTEGER || type == VAL_NUMBER;
 }
+
+bool Value::isNativeFunction() const { return type == VAL_NATIVE_FUNCTION; }
 
 std::string Value::toString() const {
   switch (type) {

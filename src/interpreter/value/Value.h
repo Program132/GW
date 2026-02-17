@@ -13,8 +13,16 @@ enum ValueType {
   VAL_BOOLEAN,
   VAL_STRUCT,
   VAL_CLASS,
-  VAL_CHAR
+  VAL_CHAR,
+  VAL_NATIVE_FUNCTION
 };
+
+#include <functional>
+#include <vector>
+
+
+class Value;
+using NativeFunction = std::function<Value(const std::vector<Value> &)>;
 
 class Value {
 private:
@@ -29,6 +37,9 @@ private:
   std::shared_ptr<std::map<std::string, Value>> structMembers;
   std::string structName;
 
+  // Store native function
+  NativeFunction nativeFunc;
+
   friend class Interpreter;
 
 public:
@@ -42,6 +53,7 @@ public:
   Value(bool value);
   Value(std::string structName, std::map<std::string, Value> *members);
   Value(ValueType type, const std::string &value);
+  Value(NativeFunction func); // Constructor for native functions
 
   // Copy constructor et assignment operator
   Value(const Value &other);
@@ -57,6 +69,7 @@ public:
   std::string asString() const;
   bool asBool() const;
   char asChar() const;
+  NativeFunction asNativeFunction() const;
 
   bool isInt() const;
   bool isDouble() const;
@@ -65,6 +78,7 @@ public:
   bool isChar() const;
   bool isNull() const;
   bool isNumber() const;
+  bool isNativeFunction() const;
 
   std::string toString() const;
   double toNumber() const;
