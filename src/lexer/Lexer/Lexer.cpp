@@ -41,6 +41,13 @@ void Lexer::appendToken() {
     return;
   }
 
+  if (type == TokenType::IDENTIFIER && value == "static") {
+    this->current.setType(TokenType::STATIC_KEYWORD);
+    this->tokens.append(this->current);
+    this->current = Token();
+    return;
+  }
+
   if (type == TokenType::WHITESPACE || type == TokenType::COMMENT) {
     this->current = Token();
     return;
