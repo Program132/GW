@@ -18,6 +18,8 @@ enum TokenType {
   CHAR,
   NULL_TOKEN,
 
+  EXTENDS,
+
   OPERATOR,
   MATH_OPERATOR,
 
@@ -55,6 +57,8 @@ inline std::string tokenTypeToString(TokenType type) {
     return "STRING";
   case NULL_TOKEN:
     return "NULL_TOKEN";
+  case EXTENDS:
+    return "EXTENDS";
   case OPERATOR:
     return "OPERATOR";
   case MATH_OPERATOR:
