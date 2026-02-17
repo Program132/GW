@@ -552,6 +552,26 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
   }
   Token name = this->advance();
 
+  Token superclass = Token();
+  if (this->checkType(TokenType::EXTENDS)) {
+    this->advance();
+    if (peek().getType() != TokenType::IDENTIFIER) {
+      throw std::runtime_error("Expected identifier after extends at line " +
+                               std::to_string(peek().getLine()));
+    }
+    superclass = this->advance();
+  } else if (peek().getType() == TokenType::IDENTIFIER &&
+             peek().getValue() == "extends") {
+    // Fallback for manually checked identifier, though match(EXTENDS) should
+    // work if lexer is correct. Lexer maps "extends" to EXTENDS token type.
+    this->advance();
+    if (peek().getType() != TokenType::IDENTIFIER) {
+      throw std::runtime_error("Expected identifier after extends at line " +
+                               std::to_string(peek().getLine()));
+    }
+    superclass = this->advance();
+  }
+
   this->consume(TokenType::OPERATOR, "{", "Expected '{' after class name");
 
   List<List<Token>> fields;
@@ -572,6 +592,10 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
                                  std::to_string(peek().getLine()));
       }
       Token fieldName = this->advance();
+      // Check if it's "constructor" without checking identifier specifically
+      // (if lexer didn't map it) Actually, constructor is handled above by
+      // checkIdentifier.
+
       this->consume(TokenType::OPERATOR, ":", "Expected ':' after field name");
 
       if (!this->checkType(TokenType::IDENTIFIER)) {
@@ -592,8 +616,8 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
 
   this->consume(TokenType::OPERATOR, "}", "Expected '}' after class body");
 
-  return new ClassDeclarationStatement(name, fields, methods, constructors,
-                                       operators);
+  return new ClassDeclarationStatement(name, superclass, fields, methods,
+                                       constructors, operators);
 }
 
 ConstructorDeclarationStatement *Parser::constructorDeclarationStatement() {
