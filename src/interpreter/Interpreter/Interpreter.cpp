@@ -3,7 +3,6 @@
 #include "ReturnException.h"
 #include <iostream>
 
-
 Interpreter::Interpreter() { environment = new Environment(); }
 
 Interpreter::Interpreter(List<Statement *> statements)
@@ -640,6 +639,11 @@ Value Interpreter::tokenToValue(const Token &token) {
     return Value(value);
   case TokenType::BOOLEAN:
     return Value(value == "true");
+  case TokenType::CHAR:
+    if (value.length() > 0) {
+      return Value(value[0]);
+    }
+    return Value(); // Should not happen for valid CHAR tokens
   default:
     return Value();
   }
