@@ -36,6 +36,13 @@ Value::Value(std::string structName, std::map<std::string, Value> *members)
   structMembers = std::make_shared<std::map<std::string, Value>>(*members);
 }
 
+Value::Value(ValueType type, const std::string &value)
+    : type(type), intValue(0), stringValue(value), structMembers(nullptr),
+      structName("") {
+  if (type != VAL_CLASS) {
+  }
+}
+
 Value::Value(const Value &other)
     : type(other.type), structMembers(other.structMembers),
       structName(other.structName) {
@@ -47,6 +54,7 @@ Value::Value(const Value &other)
     doubleValue = other.doubleValue;
     break;
   case VAL_STRING:
+  case VAL_CLASS:
     new (&stringValue) std::string(other.stringValue);
     break;
   case VAL_BOOLEAN:
@@ -83,6 +91,7 @@ Value &Value::operator=(const Value &other) {
       doubleValue = other.doubleValue;
       break;
     case VAL_STRING:
+    case VAL_CLASS:
       new (&stringValue) std::string(other.stringValue);
       break;
     case VAL_BOOLEAN:
@@ -100,7 +109,7 @@ Value &Value::operator=(const Value &other) {
 }
 
 Value::~Value() {
-  if (type == VAL_STRING) {
+  if (type == VAL_STRING || type == VAL_CLASS) {
     stringValue.~basic_string();
   }
   // shared_ptr handles structMembers deletion
@@ -125,7 +134,9 @@ double Value::asDouble() const {
 std::string Value::asString() const {
   if (type == VAL_STRING)
     return stringValue;
-  throw std::runtime_error("Value is not a string");
+  if (type == VAL_CLASS)
+    return stringValue;
+  throw std::runtime_error("Value is not a string or class name");
 }
 
 bool Value::asBool() const {

@@ -41,6 +41,7 @@ public:
   Value(char value);
   Value(bool value);
   Value(std::string structName, std::map<std::string, Value> *members);
+  Value(ValueType type, const std::string &value);
 
   // Copy constructor et assignment operator
   Value(const Value &other);
