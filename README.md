@@ -101,6 +101,13 @@ Dive into the details and start building with GW:
 | 🔁 **[Loops](doc/loops.md)** | Mastering iterations. |
 | 🏗️ **[Struct](doc/struct.md)** | Lightweight data structures. |
 | 🏛️ **[Class](doc/class.md)** | Advanced object-orientation. |
+| 📂 **[Imports](doc/imports.md)** | Import other files. |
+
+Native functions:
+| Topic | Description |
+| :--- | :--- |
+| ❓ **[Introduction](doc/native/readme.md)** | Low-level C++ implementations directly bound to the interpreter. |
+| 🕛 **[Time](doc/native/time.md)** | Low-level C++ implementations directly bound to the interpreter. |
 
 ## Compile & Run
 
