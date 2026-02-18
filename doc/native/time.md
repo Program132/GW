@@ -10,6 +10,14 @@ The following functions are available in the global scope when the interpreter i
 
 Returns the current Unix timestamp (seconds since January 1, 1970 UTC).
 
+### `__native_time() -> Integer`
+
+Returns the current Unix timestamp (seconds since January 1, 1970 UTC).
+
+### `__native_time_double() -> Number`
+
+Returns the current Unix timestamp (seconds since January 1, 1970 UTC) as a double.
+
 ### `__native_sleep(seconds: Integer)`
 
 Pauses the execution of the current thread for the specified number of seconds.

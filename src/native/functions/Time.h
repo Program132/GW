@@ -19,6 +19,13 @@ inline Value __nativeTime(const std::vector<Value> &args) {
   return Value((int)std::time(nullptr));
 }
 
+inline Value __nativeTimeDouble(const std::vector<Value> &args) {
+  if (args.size() != 0) {
+    throw std::runtime_error("[GW NATIVE] time() takes 0 argument");
+  }
+  return Value((double)std::time(nullptr));
+}
+
 inline Value __nativeSleep(const std::vector<Value> &args) {
   if (args.size() != 1) {
     throw std::runtime_error("[GW NATIVE] sleep() takes 1 argument");
