@@ -1,7 +1,7 @@
 #ifndef TIME_H
 #define TIME_H
 
-#include "../../interpreter/value/Value.h"
+#include "../interpreter/value/Value.h"
 #include <ctime>
 #include <iostream>
 #include <vector>

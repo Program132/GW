@@ -13,7 +13,7 @@
 #include "src/lexer/Lexer/Lexer.h"
 #include "src/parser/Parser/Parser.h"
 
-#include "src/native/functions/Time.h"
+#include "src/native/Time.h"
 
 void registerNatives(Interpreter &interpreter) {
   interpreter.addNativeFunction("__native_time", __nativeTime);
