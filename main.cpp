@@ -14,10 +14,11 @@
 #include "src/parser/Parser/Parser.h"
 
 #include "src/native/InputOutput.h"
+#include "src/native/Network.h"
+#include "src/native/String.h"
 #include "src/native/System.h"
 #include "src/native/Time.h"
 
-#include "src/native/Network.h"
 
 void registerNatives(Interpreter &interpreter) {
   // Time.h
@@ -67,6 +68,10 @@ void registerNatives(Interpreter &interpreter) {
   // System Args
   interpreter.addNativeFunction("__native_get_arg_count", __nativeGetArgCount);
   interpreter.addNativeFunction("__native_get_arg", __nativeGetArg);
+
+  // String.h
+  interpreter.addNativeFunction("__native_string_length", __nativeStringLength);
+  interpreter.addNativeFunction("__native_string_at", __nativeStringAt);
 }
 
 void runAllTests() {
