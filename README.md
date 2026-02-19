@@ -112,6 +112,7 @@ Native functions:
 | ⌨️ **[Input/Output](doc/native/io.md)** | C++ implementations of input/output functions. |
 | 🖥️ **[System](doc/native/system.md)** | C++ implementations of system (exec cmds, exit, ...) functions. |
 | 🌐 **[Network](doc/native/network.md)** | TCP/IP Socket implementation for networking. |
+| 📝 **[String](doc/native/string.md)** | C++ implementations of string utilities functions. |
 
 ## Compile & Run
 
