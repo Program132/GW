@@ -44,6 +44,23 @@ inline Value __nativeSleep(const std::vector<Value> &args) {
   return Value();
 }
 
+inline Value __nativeSleepDouble(const std::vector<Value> &args) {
+  if (args.size() != 1) {
+    throw std::runtime_error("[GW NATIVE] sleep() takes 1 argument");
+  }
+  if (!args[0].isNumber()) {
+    throw std::runtime_error(
+        "[GW NATIVE] sleep() takes a number (int or double)");
+  }
+  double seconds = args[0].asDouble();
+#ifdef _WIN32
+  Sleep(seconds * 1000);
+#else
+  sleep(seconds);
+#endif
+  return Value();
+}
+
 inline Value __nativeCTime(const std::vector<Value> &args) {
   std::time_t timestamp;
   if (args.size() == 0) {

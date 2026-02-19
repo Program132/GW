@@ -24,6 +24,7 @@ void registerNatives(Interpreter &interpreter) {
   interpreter.addNativeFunction("__native_time", __nativeTime);
   interpreter.addNativeFunction("__native_time_double", __nativeTimeDouble);
   interpreter.addNativeFunction("__native_sleep", __nativeSleep);
+  interpreter.addNativeFunction("__native_sleep_double", __nativeSleepDouble);
   interpreter.addNativeFunction("__native_ctime", __nativeCTime);
 
   // InputOutput.h
