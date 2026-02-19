@@ -13,13 +13,34 @@
 #include "src/lexer/Lexer/Lexer.h"
 #include "src/parser/Parser/Parser.h"
 
+#include "src/native/InputOutput.h"
 #include "src/native/Time.h"
 
 void registerNatives(Interpreter &interpreter) {
+  // Time.h
   interpreter.addNativeFunction("__native_time", __nativeTime);
   interpreter.addNativeFunction("__native_time_double", __nativeTimeDouble);
   interpreter.addNativeFunction("__native_sleep", __nativeSleep);
   interpreter.addNativeFunction("__native_ctime", __nativeCTime);
+
+  // InputOutput.h
+  interpreter.addNativeFunction("__native_print", __nativePrint);
+  interpreter.addNativeFunction("__native_input_string", __nativeInputString);
+  interpreter.addNativeFunction("__native_input_int", __nativeInputInt);
+  interpreter.addNativeFunction("__native_input_double", __nativeInputDouble);
+
+  interpreter.addNativeFunction("__native_file_read", __nativeFileRead);
+  interpreter.addNativeFunction("__native_file_write", __nativeFileWrite);
+  interpreter.addNativeFunction("__native_file_append", __nativeFileAppend);
+
+  interpreter.addNativeFunction("__native_read_stdin", __nativeReadStdin);
+  interpreter.addNativeFunction("__native_write_stdout", __nativeWriteStdout);
+
+  interpreter.addNativeFunction("__native_clear_console", __nativeClearConsole);
+  interpreter.addNativeFunction("__native_set_cursor",
+                                __nativeSetCursorPosition);
+  interpreter.addNativeFunction("__native_get_cursor",
+                                __nativeGetCursorPosition);
 }
 
 void runAllTests() {
