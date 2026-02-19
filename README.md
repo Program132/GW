@@ -6,6 +6,7 @@
 ![Code size](https://img.shields.io/github/languages/code-size/Program132/GW?style=for-the-badge&logo=github)
 ![Downloads](https://img.shields.io/github/downloads/Program132/GW/total?color=%2324cc24&style=for-the-badge&logo=github)
 ![Open Issues](https://img.shields.io/github/issues/Program132/GW?style=for-the-badge&logo=github)
+![Closed Issues](https://img.shields.io/github/issues-closed/Program132/GW)
 
 [Documentation](#documentation) • [Example](#quick-peek)
 
