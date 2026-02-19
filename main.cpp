@@ -63,6 +63,10 @@ void registerNatives(Interpreter &interpreter) {
   interpreter.addNativeFunction("__native_socket_bind", __nativeSocketBind);
   interpreter.addNativeFunction("__native_socket_listen", __nativeSocketListen);
   interpreter.addNativeFunction("__native_socket_accept", __nativeSocketAccept);
+
+  // System Args
+  interpreter.addNativeFunction("__native_get_arg_count", __nativeGetArgCount);
+  interpreter.addNativeFunction("__native_get_arg", __nativeGetArg);
 }
 
 void runAllTests() {
@@ -135,6 +139,7 @@ int main(int argc, char *argv[]) {
   bool testing = false;
   bool help = false;
   std::string filename = "";
+  int scriptArgsIndex = argc; // Default: no args
 
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
@@ -144,8 +149,13 @@ int main(int argc, char *argv[]) {
       help = true;
     } else {
       filename = arg;
+      scriptArgsIndex = i + 1; // All args AFTER filename are for the script
+      break; // Stop parsing options for GW, rest is for script
     }
   }
+
+  // Pass args to System module
+  GW_setArgs(argc, argv, scriptArgsIndex);
 
   if (testing) {
     runAllTests();
