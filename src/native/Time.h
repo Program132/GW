@@ -20,11 +20,18 @@ inline Value __nativeTime(const std::vector<Value> &args) {
   return Value((int)std::time(nullptr));
 }
 
+#include <chrono>
+
 inline Value __nativeTimeDouble(const std::vector<Value> &args) {
   if (args.size() != 0) {
     throw std::runtime_error("[GW NATIVE] time() takes 0 argument");
   }
-  return Value((double)std::time(nullptr));
+  auto now = std::chrono::high_resolution_clock::now();
+  auto duration = now.time_since_epoch();
+  double seconds =
+      std::chrono::duration_cast<std::chrono::duration<double>>(duration)
+          .count();
+  return Value(seconds);
 }
 
 inline Value __nativeSleep(const std::vector<Value> &args) {
