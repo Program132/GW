@@ -107,8 +107,9 @@ Dive into the details and start building with GW:
 Native functions:
 | Topic | Description |
 | :--- | :--- |
-| ❓ **[Introduction](doc/native/readme.md)** | Low-level C++ implementations directly bound to the interpreter. |
-| 🕛 **[Time](doc/native/time.md)** | Low-level C++ implementations directly bound to the interpreter. |
+| ❓ **[Introduction](doc/native/readme.md)** | C++ functions directly bound to the interpreter. |
+| 🕛 **[Time](doc/native/time.md)** | C++ implementations of "time" (timestamps, sleep) functions. |
+| ⌨️ **[Input/Output](doc/native/io.md)** | C++ implementations of input/output functions. |
 
 ## Compile & Run
 
