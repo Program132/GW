@@ -19,7 +19,6 @@
 #include "src/native/System.h"
 #include "src/native/Time.h"
 
-
 void registerNatives(Interpreter &interpreter) {
   // Time.h
   interpreter.addNativeFunction("__native_time", __nativeTime);
@@ -170,7 +169,7 @@ int main(int argc, char *argv[]) {
   if (help) {
     std::cout << "GW Informations: \n"
               << "- GitHub: https://github.com/Program132/GW/ \n"
-              << "- Version: 1.0.0\n"
+              << "- Version: 1.1.0\n"
               << "How to use: \n"
               << "- ./GW <filename> : Run the program and interpret the code "
                  "from the file\n"
