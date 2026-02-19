@@ -18,6 +18,11 @@ Returns the current Unix timestamp (seconds since January 1, 1970 UTC) as a doub
 
 Pauses the execution of the current thread for the specified number of seconds.
 
+### `__native_sleep_double(seconds: Number)`
+
+Pauses the execution of the current thread for the specified number of seconds (you can give a double value (Number)).
+
+
 ## Standard Library Implementation
 
 The following pure GW code demonstrates how to implement a full `Time` and `DateUtils` library using these primitives. this implementation includes a full UTC `ctime` formatter.
