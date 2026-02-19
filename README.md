@@ -111,6 +111,7 @@ Native functions:
 | 🕛 **[Time](doc/native/time.md)** | C++ implementations of "time" (timestamps, sleep) functions. |
 | ⌨️ **[Input/Output](doc/native/io.md)** | C++ implementations of input/output functions. |
 | 🖥️ **[System](doc/native/system.md)** | C++ implementations of system (exec cmds, exit, ...) functions. |
+| 🌐 **[Network](doc/native/network.md)** | TCP/IP Socket implementation for networking. |
 
 ## Compile & Run
 
