@@ -35,6 +35,20 @@ Terminates the GW program immediately with the specified exit code.
 
 ---
 
+### Command Line Arguments
+
+These functions allow access to arguments passed to the script (e.g., `GW script.gw arg1 arg2`).
+
+#### `__native_get_arg_count() -> Int`
+Returns the number of arguments passed to the script.
+
+#### `__native_get_arg(index: Int) -> String`
+Returns the argument at the specified index.
+*   **index**: The 0-based index of the argument.
+*   **Throws**: An error if the index is out of bounds.
+
+---
+
 ## Example: System Wrapper Class
 
 ```kotlin
@@ -51,20 +65,27 @@ class System {
         return __native_is_windows();
     }
     
-    static func getPlatform() -> String {
-        if (__native_is_windows()) { return "Windows"; }
-        if (__native_is_linux()) { return "Linux"; }
-        if (__native_is_mac()) { return "MacOS"; }
-        return "Unknown";
+    # Arguments Helper
+    static func getArgs() -> List {
+        # Note: Ideally returns a List, but here we simulate access via count/index
+        # You could implement a proper List builder here if List class is available
+        return null; 
+    }
+    
+    static func getArg(index: Int) -> String {
+        return __native_get_arg(index);
+    }
+    
+    static func getArgCount() -> Int {
+        return __native_get_arg_count();
     }
 }
 
-# Usage
-if (System.isWindows()) {
-    System.exec("dir");
-} else {
-    System.exec("ls");
+# Usage: GW script.gw --verbose
+var count = System.getArgCount();
+if (count > 0) {
+    var firstArg = System.getArg(0);
+    if (firstArg == "--verbose") {
+        print("Verbose mode enabled.\n");
+    }
 }
-
-System.exit(0);
-```
