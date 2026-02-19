@@ -14,6 +14,7 @@
 #include "src/parser/Parser/Parser.h"
 
 #include "src/native/InputOutput.h"
+#include "src/native/System.h"
 #include "src/native/Time.h"
 
 void registerNatives(Interpreter &interpreter) {
@@ -41,6 +42,13 @@ void registerNatives(Interpreter &interpreter) {
                                 __nativeSetCursorPosition);
   interpreter.addNativeFunction("__native_get_cursor",
                                 __nativeGetCursorPosition);
+
+  // System.h
+  interpreter.addNativeFunction("__native_exec_cmd", __nativeExecCmd);
+  interpreter.addNativeFunction("__native_is_windows", __nativeIsWindows);
+  interpreter.addNativeFunction("__native_is_linux", __nativeIsLinux);
+  interpreter.addNativeFunction("__native_is_mac", __nativeIsMac);
+  interpreter.addNativeFunction("__native_exit", __nativeExit);
 }
 
 void runAllTests() {
