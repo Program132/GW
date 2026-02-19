@@ -1,0 +1,292 @@
+# DateUtils Class give you access to useful functions to manage the date, get the current date, etc.
+# @author Program132
+class DateUtils {
+    # Returns the full month name from the id (1-12)
+    # @param id The month id (1-12)
+    # @return The full month name or "Invalid month ID" if the id is not valid
+    static func getFullMonthNameFromID(id: Integer) -> String {
+        if (id == 1) {
+            return "January";
+        }
+        if (id == 2) {
+            return "February";
+        }
+        if (id == 3) {
+            return "March";
+        }
+        if (id == 4) {
+            return "April";
+        }
+        if (id == 5) {
+            return "May";
+        }
+        if (id == 6) {
+            return "June";
+        }
+        if (id == 7) {
+            return "July";
+        }
+        if (id == 8) {
+            return "August";
+        }
+        if (id == 9) {
+            return "September";
+        }
+        if (id == 10) {
+            return "October";
+        }
+        if (id == 11) {
+            return "November";
+        }
+        if (id == 12) {
+            return "December";
+        }
+        return "Invalid month ID";
+    }
+
+    # Returns the id from the full month name (-1 if the name isn't valid)
+    # @param name The month name
+    # @return The month id (1-12) or -1 if the name isn't valid
+    static func getIDFromFullMonthName(name: String) -> Integer {
+        if (name == "January") {
+            return 1;
+        }
+        if (name == "February") {
+            return 2;
+        }
+        if (name == "March") {
+            return 3;
+        }
+        if (name == "April") {
+            return 4;
+        }
+        if (name == "May") {
+            return 5;
+        }
+        if (name == "June") {
+            return 6;
+        }
+        if (name == "July") {
+            return 7;
+        }
+        if (name == "August") {
+            return 8;
+        }
+        if (name == "September") {
+            return 9;
+        }
+        if (name == "October") {
+            return 10;
+        }
+        if (name == "November") {
+            return 11;
+        }
+        if (name == "December") {
+            return 12;
+        }
+        return -1;
+    }
+
+    # Returns true if the year is a leap year
+    # @param year The year to check
+    # @return True if the year is a leap year, false otherwise
+    static func isLeap(year: Integer) -> Boolean {
+        return year % 4 == 0 && (year % 100 ~= 0 || year % 400 == 0);
+    }
+
+    # Returns the number of days in a month 
+    # @param month The month id (1-12)
+    # @param year The year
+    # @return The number of days in the month
+    static func getDaysInMonth(month: Integer, year: Integer) -> Integer {
+        if (month == 2 && DateUtils.isLeap(year)) {
+            return 29;
+        } 
+        if (month == 2 && !DateUtils.isLeap(year)) {
+            return 28;
+        }
+        if (month == 4 || month == 6 || month == 9 || month == 11) {
+            return 30;
+        }
+        return 31;
+    }
+
+    # Returns the day name from the id (1-7)
+    # @param id The day id (1-7)
+    # @return The day name or "Invalid day ID" if the id is not valid
+    static func getDayNameFromID(id: Integer) -> String {
+        if (id == 1) {
+            return "Monday";
+        }
+        if (id == 2) {
+            return "Tuesday";
+        }
+        if (id == 3) {
+            return "Wednesday";
+        }
+        if (id == 4) {
+            return "Thursday";
+        }
+        if (id == 5) {
+            return "Friday";
+        }
+        if (id == 6) {
+            return "Saturday";
+        }
+        if (id == 7) {
+            return "Sunday";
+        }
+        return "Invalid day ID";
+    }
+
+    # Returns the day id from the day name (-1 if the name isn't valid)
+    # @param name The day name
+    # @return The day id (1-7) or -1 if the name isn't valid
+    static func getIDFromDayName(name: String) -> Integer {
+        if (name == "Monday") {
+            return 1;
+        }
+        if (name == "Tuesday") {
+            return 2;
+        }
+        if (name == "Wednesday") {
+            return 3;
+        }
+        if (name == "Thursday") {
+            return 4;
+        }
+        if (name == "Friday") {
+            return 5;
+        }
+        if (name == "Saturday") {
+            return 6;
+        }
+        if (name == "Sunday") {
+            return 7;
+        }
+        return -1;
+    }
+
+    # Returns a formatted date string from the timestamp (e.g. "Thursday January 1 00:00:00 1970")
+    # @param ts The timestamp (seconds)
+    # @return The formatted date string
+    static func formatDate(ts: Integer) -> String {
+        var seconds = ts;
+        var minutes = (seconds - (seconds % 60)) / 60;
+        seconds = seconds % 60;
+        var hours = (minutes - (minutes % 60)) / 60;
+        minutes = minutes % 60;
+        
+        var totalDays = (hours - (hours % 24)) / 24;
+        
+        # 1970-01-01 was a Thursday (4th day of week if Monday=1)
+        var dayOfWeek = (4 + totalDays) % 7;
+        if (dayOfWeek == 0) { dayOfWeek = 7; } # Handle Sunday
+
+        var days = totalDays;
+        hours = hours % 24;
+
+        var year = 1970;
+        var daysInYear = 365;
+        while (true) {
+            daysInYear = 365;
+            if (DateUtils.isLeap(year)) {
+                daysInYear = 366;
+            }
+            if (days < daysInYear) {
+                break;
+            }
+            days = days - daysInYear;
+            year = year + 1;
+        }
+
+        var month = 1;
+        var daysInMonth = 0; 
+        while (true) {
+            daysInMonth = DateUtils.getDaysInMonth(month, year);
+            if (days < daysInMonth) {
+                break;
+            }
+            days = days - daysInMonth;
+            month = month + 1;
+        }
+
+        var day = days + 1;
+        
+        var dayName = DateUtils.getDayNameFromID(dayOfWeek);
+        var monthName = DateUtils.getFullMonthNameFromID(month);
+
+        var timeStr = "";
+        if (hours < 10) { timeStr = timeStr + "0"; }
+        timeStr = timeStr + hours + ":";
+        if (minutes < 10) { timeStr = timeStr + "0"; }
+        timeStr = timeStr + minutes + ":";
+        if (seconds < 10) { timeStr = timeStr + "0"; }
+        timeStr = timeStr + seconds;
+
+        var dayStr = "" + day;
+
+        return dayName + " " + monthName + " " + dayStr + " " + timeStr + " " + year;
+    }
+
+    # Creates a timestamp from year, month, and day (at 00:00:00 UTC)
+    # @param year The year (e.g. 2026)
+    # @param month The month (1-12)
+    # @param day The day (1-31)
+    # @return The timestamp in seconds
+    static func getTimeStampFromDate(year: Integer, month: Integer, day: Integer) -> Integer {
+        var totalDays = 0;
+        
+        var y = 1970;
+        while (y < year) {
+            totalDays = totalDays + 365;
+            if (DateUtils.isLeap(y)) {
+                totalDays = totalDays + 1;
+            }
+            y = y + 1;
+        }
+
+        var m = 1;
+        while (m < month) {
+            totalDays = totalDays + DateUtils.getDaysInMonth(m, year);
+            m = m + 1;
+        }
+
+        totalDays = totalDays + (day - 1);
+        return totalDays * 86400;
+    }
+}
+
+# Time Class give you access to useful functions to manage the time, get the current time (timestamps), date, sleep etc.
+# @author Program132
+class Time {
+    # Returns the current Unix timestamp (seconds since January 1, 1970 UTC).
+    # @return The current Unix timestamp (seconds since January 1, 1970 UTC)
+    static func now() -> Integer {
+        return __native_time();
+    }
+    
+    # Returns the current Unix timestamp (seconds since January 1, 1970 UTC) as a double.
+    # @return The current Unix timestamp (seconds since January 1, 1970 UTC) as a double
+    static func nowd() -> Number {
+        return __native_time_double();
+    }
+
+    # Suspends the current thread for the specified number of seconds (integer).
+    # @param seconds The number of seconds to sleep
+    static func sleep(seconds: Integer) {
+        __native_sleep(seconds);
+    }
+
+    # Suspends the current thread for the specified number of seconds (number).
+    # @param seconds The number of seconds to sleep
+    static func sleepd(seconds: Number) {
+        __native_sleep_double(seconds);
+    }
+
+    # Returns the current date from the timestamp (seconds)
+    # @return The current date as a string
+    static func ctime() -> String {
+        return DateUtils.formatDate(Time.now());
+    }
+}
