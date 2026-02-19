@@ -110,6 +110,7 @@ Native functions:
 | ❓ **[Introduction](doc/native/readme.md)** | C++ functions directly bound to the interpreter. |
 | 🕛 **[Time](doc/native/time.md)** | C++ implementations of "time" (timestamps, sleep) functions. |
 | ⌨️ **[Input/Output](doc/native/io.md)** | C++ implementations of input/output functions. |
+| 🖥️ **[System](doc/native/system.md)** | C++ implementations of system (exec cmds, exit, ...) functions. |
 
 ## Compile & Run
 
