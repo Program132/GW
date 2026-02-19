@@ -116,6 +116,7 @@ inline Value __nativeWriteStdout(const std::vector<Value> &args) {
 }
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 
