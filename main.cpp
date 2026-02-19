@@ -17,6 +17,8 @@
 #include "src/native/System.h"
 #include "src/native/Time.h"
 
+#include "src/native/Network.h"
+
 void registerNatives(Interpreter &interpreter) {
   // Time.h
   interpreter.addNativeFunction("__native_time", __nativeTime);
@@ -49,6 +51,18 @@ void registerNatives(Interpreter &interpreter) {
   interpreter.addNativeFunction("__native_is_linux", __nativeIsLinux);
   interpreter.addNativeFunction("__native_is_mac", __nativeIsMac);
   interpreter.addNativeFunction("__native_exit", __nativeExit);
+
+  // Network.h
+  interpreter.addNativeFunction("__native_socket_create", __nativeSocketCreate);
+  interpreter.addNativeFunction("__native_socket_close", __nativeSocketClose);
+  interpreter.addNativeFunction("__native_socket_connect",
+                                __nativeSocketConnect);
+  interpreter.addNativeFunction("__native_socket_send", __nativeSocketSend);
+  interpreter.addNativeFunction("__native_socket_receive",
+                                __nativeSocketReceive);
+  interpreter.addNativeFunction("__native_socket_bind", __nativeSocketBind);
+  interpreter.addNativeFunction("__native_socket_listen", __nativeSocketListen);
+  interpreter.addNativeFunction("__native_socket_accept", __nativeSocketAccept);
 }
 
 void runAllTests() {
