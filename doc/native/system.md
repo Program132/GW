@@ -6,9 +6,10 @@ This module provides bindings for interacting with the operating system, executi
 
 ### Command Execution
 
-#### `__native_exec_cmd(command: String)`
-Executes a system shell command. The output is printed directly to the standard output.
+#### `__native_exec_cmd(command: String) -> String`
+Executes a system shell command and returns the standard output (`stdout`) as a string.
 *   **command**: The shell command to run (e.g., `ls -la`, `dir`).
+*   **Returns**: The output of the command.
 
 ---
 
@@ -27,11 +28,20 @@ Returns `true` if the interpreter is running on **MacOS**, `false` otherwise.
 
 ---
 
-### Process Management
+### Process & Environment Management
 
 #### `__native_exit(code: Int)`
 Terminates the GW program immediately with the specified exit code.
 *   **code**: The status code to return to the parent process (0 usually indicates success).
+
+#### `__native_get_pid() -> Int`
+Returns the Process ID (PID) of the current GW process.
+
+#### `__native_set_env(name: String, value: String) -> Boolean`
+Sets an environment variable for the current process.
+*   **name**: The name of the environment variable.
+*   **value**: The value to set.
+*   **Returns**: `true` on success.
 
 ---
 
@@ -89,3 +99,4 @@ if (count > 0) {
         print("Verbose mode enabled.\n");
     }
 }
+```
