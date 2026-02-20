@@ -53,6 +53,7 @@ void registerNatives(Interpreter &interpreter) {
   interpreter.addNativeFunction("__native_is_mac", __nativeIsMac);
   interpreter.addNativeFunction("__native_exit", __nativeExit);
   interpreter.addNativeFunction("__native_set_env", __nativeSetEnv);
+  interpreter.addNativeFunction("__native_get_pid", __nativeGetPID);
 
   // Network.h
   interpreter.addNativeFunction("__native_socket_create", __nativeSocketCreate);
