@@ -1,0 +1,115 @@
+# OS Class gives operating system functions
+# @author Program 
+class OS {
+    # Exit the program
+    # @param code The exit code
+    static func exit(code: Integer) -> Void {
+        __native_exit(code);
+    }
+
+    # Run a command
+    # @param command The command to run
+    # @return The output of the command
+    static func exec(command: String) -> String {
+        return __native_exec_cmd(command);
+    }
+
+    # Check if the program is running on Windows
+    # @return True if the program is running on Windows, false otherwise
+    static func isWindows() -> Boolean {
+        return __native_is_windows();
+    }
+
+    # Check if the program is running on Linux
+    # @return True if the program is running on Linux, false otherwise
+    static func isLinux() -> Boolean {
+        return __native_is_linux();
+    }
+
+    # Check if the program is running on macOS
+    # @return True if the program is running on macOS, false otherwise
+    static func isMac() -> Boolean {
+        return __native_is_mac();
+    }
+
+    # Get the value of an environment variable
+    # @param name The name of the environment variable
+    # @return The value of the environment variable
+    static func getEnv(name: String) -> String {
+        if (OS.isWindows()) {
+            var env = OS.exec("echo %" + name + "%");
+            return env;
+        } 
+        if (OS.isLinux() || OS.isMac()) {
+            var env = OS.exec("echo $" + name);
+            return env;
+        } 
+        return "";
+    }
+
+    # Get the hostname of the computer 
+    # @return hostname
+    static func getHostName() -> String {
+        var hostname = OS.exec("hostname");
+        return hostname;
+    }
+
+    # Get the user name of the computer logged in
+    # @return username (like root, myUser, ...)
+    static func getUsername() -> String {
+        var userName = OS.exec("whoami");
+        return userName;
+    }
+
+    # Get the current directory
+    # @return current directory
+    static func getCurrentDirectory() -> String {
+        if (OS.isWindows()) {
+            return OS.exec("cd");
+        }
+        return OS.exec("pwd");
+    }
+
+    # Set an environment variable with a custom value (as a string)
+    # @param name The name of the environment variable
+    # @param value The value of the environment variable
+    static func setEnv(name: String, value: String) -> Void {
+        return __native_set_env(name, value);
+    }
+
+    # Terminate a process by its PID (using system commands)
+    # @param pid The process ID
+    static func kill(pid: Integer) -> String {
+        if (OS.isWindows()) {
+            return OS.exec("taskkill /F /PID " + pid);
+        } 
+        if (OS.isLinux() || OS.isMac()) {
+            return OS.exec("kill -9 " + pid);
+        }
+        return "Unsupported OS";
+    }
+
+    # Get the platform
+    # @return platform (windows, linux, mac)
+    static func getPlatform() -> String {
+        if (OS.isWindows()) {
+            return "Windows";
+        } 
+        if (OS.isLinux()) {
+            return "Linux";
+        } 
+        if (OS.isMac()) {
+            return "Mac";
+        }
+        return "Unsupported OS";
+    }
+
+    # Get the PID of the current process
+    # @return PID
+    static func getPID() -> Integer {
+        return __native_get_pid();
+    }
+}
+
+
+println(OS.getPID());
