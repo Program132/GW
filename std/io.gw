@@ -1,0 +1,78 @@
+# File and Console Standard Library: IO native functions application
+# @author Program
+
+class File {
+    # Reads the entire content of a file
+    # @param path The file path
+    # @return The file content as a string
+    static func read(path: String) -> String {
+        return __native_file_read(path);
+    }
+
+    # Writes content to a file (overwrites if exists)
+    # @param path The file path
+    # @param content The content to write
+    static func write(path: String, content: String) {
+        __native_file_write(path, content);
+    }
+
+    # Appends content to a file
+    # @param path The file path
+    # @param content The content to append
+    static func append(path: String, content: String) {
+        __native_file_append(path, content);
+    }
+}
+
+class Console {
+    # Prints a line to the console
+    # @param text The text to print
+    static func println(text: String) {
+        __native_print(text);
+    }
+
+    # Reads a string from the user
+    # @param prompt The message to show
+    # @return The user input
+    static func readString(prompt: String) -> String {
+        return __native_input_string(prompt);
+    }
+
+    # Reads an integer from the user
+    # @param prompt The message to show
+    # @return The user input as an integer
+    static func readInt(prompt: String) -> Integer {
+        return __native_input_int(prompt);
+    }
+
+    # Reads a number (double) from the user
+    # @param prompt The message to show
+    # @return The user input as a number
+    static func readNumber(prompt: String) -> Number {
+        return __native_input_double(prompt);
+    }
+
+    # Clears the console screen
+    static func clear() {
+        __native_clear_console();
+    }
+
+    # Sets the cursor position
+    # @param x Column
+    # @param y Row
+    static func setCursor(x: Integer, y: Integer) {
+        __native_set_cursor(x, y);
+    }
+
+    # Gets the current cursor position
+    # @return A struct CursorPos { x, y }
+    static func getCursor() -> Struct {
+        return __native_get_cursor();
+    }
+
+    # Reads everything from standard input (stdin) until EOF
+    # @return The input as a string
+    static func readAllStdin() -> String {
+        return __native_read_stdin();
+    }
+}
