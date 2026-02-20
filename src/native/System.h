@@ -139,4 +139,17 @@ inline Value __nativeSetEnv(const std::vector<Value> &args) {
   return Value(true);
 }
 
+#ifdef _WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
+inline Value __nativeGetPID(const std::vector<Value> &args) {
+#ifdef _WIN32
+  return Value((int)_getpid());
+#else
+  return Value((int)getpid());
+#endif
+}
+
 #endif // SYSTEM_H
