@@ -114,6 +114,13 @@ Native functions:
 | 🌐 **[Network](doc/native/network.md)** | TCP/IP Socket implementation for networking. |
 | 📝 **[String](doc/native/string.md)** | C++ implementations of string utilities functions. |
 
+Standard library:
+| Topic | Description |
+| :--- | :--- |
+| 🕛 **[Time](doc/std/time.md)** | Time and Date Standard Library: Time native functions application. |
+| 🖥️ **[OS](doc/std/os.md)** | OS Standard Library: System / OS native functions application. |
+| 📂 **[IO](doc/std/io.md)** | File and Console Standard Library: IO native functions application. |
+
 ## Compile & Run
 
 Windows:
