@@ -44,7 +44,7 @@ class List<T> {
 
     func set(index: Integer, value: T) {
         if (index < 0 || index >= this.size) {
-            return;
+            return null;
         }
         var current = this.head;
         for (var i = 0; i < index; i = i + 1) {
@@ -87,6 +87,44 @@ class List<T> {
             current = current.next;
         }
         return product;
+    }
+
+    func indexOf(value: T) -> Integer {
+        var current = this.head;
+        var index = 0;
+        while (current ~= null) {
+            if (current.value == value) {
+                return index;
+            }
+            current = current.next;
+            index = index + 1;
+        }
+        return -1;
+    }
+
+    func contains(value: T) -> Boolean {
+        return this.indexOf(value) ~= -1;
+    }
+
+    func remove(index: Integer) {
+        if (index < 0 || index >= this.size) {
+            return null;
+        }
+        if (index == 0) {
+            this.pop();
+            return null;
+        }
+        var current = this.head;
+        for (var i = 0; i < (index - 1); i = i + 1) {
+            current = current.next;
+        }
+        # current is the node BEFORE the one to remove
+        var toRemove = current.next;
+        current.next = toRemove.next;
+        if (toRemove == this.tail) {
+            this.tail = current;
+        }
+        this.size = this.size - 1;
     }
 
     func length() -> Integer {
