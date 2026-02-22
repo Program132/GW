@@ -1,0 +1,381 @@
+# Network and HTTP Standard Library
+# @author Program
+
+import "strings.gw";
+import "list.gw";
+import "map.gw";
+
+class Socket {
+    # Creates a TCP socket and returns its ID
+    # @return Socket ID (Integer)
+    static func create() -> Integer {
+        return __native_socket_create();
+    }
+
+    # Closes a socket
+    # @param id The socket ID
+    static func close(id: Integer) {
+        __native_socket_close(id);
+    }
+
+    # Connects a socket to a hostname and port
+    # @param id The socket ID
+    # @param host The hostname (e.g., "google.com")
+    # @param port The port (e.g., 80)
+    static func connect(id: Integer, host: String, port: Integer) {
+        __native_socket_connect(id, host, port);
+    }
+
+    # Sends data over the socket
+    # @param id The socket ID
+    # @param data The payload string
+    static func send(id: Integer, data: String) {
+        __native_socket_send(id, data);
+    }
+
+    # Receives data from the socket
+    # @param id The socket ID
+    # @param size Buffer size to read
+    # @return The received data as a string
+    static func receive(id: Integer, size: Integer) -> String {
+        return __native_socket_receive(id, size);
+    }
+
+    # Binds a socket to a port (for servers)
+    # @param id The socket ID
+    # @param port The port to bind to
+    static func bind(id: Integer, port: Integer) {
+        __native_socket_bind(id, port);
+    }
+
+    # Listens for incoming connections (for servers)
+    # @param id The socket ID
+    static func listen(id: Integer) {
+        __native_socket_listen(id);
+    }
+
+    # Accepts an incoming connection
+    # @param id The server socket ID
+    # @return The client socket ID
+    static func accept(id: Integer) -> Integer {
+        return __native_socket_accept(id);
+    }
+}
+
+class HttpUtils {
+    static func split(str: String, delimiter: String) -> List<String> {
+        var result = new List<String>();
+        var start = 0;
+        var strLen = StringUtils.length(str);
+        var delLen = StringUtils.length(delimiter);
+        
+        var sub = "";
+        var end = 0;
+
+        while (start < strLen) {
+            sub = StringUtils.substring(str, start, strLen);
+            end = StringUtils.indexOf(sub, delimiter);
+            if (end == -1) {
+                result.append(sub);
+                break;
+            }
+            result.append(StringUtils.substring(sub, 0, end));
+            start = start + end + delLen;
+        }
+        return result;
+    }
+
+    static func parseHeaders(headerLines: List<String>, startIdx: Integer) -> Map<String, String> {
+        var headers = new Map<String, String>();
+        var i = startIdx;
+        var len = headerLines.length();
+
+        var line = "";
+        var sep = 0;
+        var key = "";
+        var val = "";
+
+        while (i < len) {
+            line = headerLines.get(i);
+            sep = StringUtils.indexOf(line, ":");
+            if (sep ~= -1) {
+                key = StringUtils.trim(StringUtils.substring(line, 0, sep));
+                val = StringUtils.trim(StringUtils.substring(line, sep + 1, StringUtils.length(line)));
+                headers.put(key, val);
+            }
+            i = i + 1;
+        }
+        return headers;
+    }
+}
+
+class HttpResponse {
+    status: Integer,
+    headers: Map<String, String>,
+    body: String
+
+    constructor(raw: String) {
+        this.headers = new Map<String, String>();
+        this.status = 200;
+        this.body = "";
+
+        if (StringUtils.length(raw) == 0) { return; }
+
+        var headerEnd = StringUtils.indexOf(raw, "\r\n\r\n");
+        var headerPart = "";
+        if (headerEnd == -1) {
+            headerPart = raw;
+        } else {
+            headerPart = StringUtils.substring(raw, 0, headerEnd);
+            this.body = StringUtils.substring(raw, headerEnd + 4, StringUtils.length(raw));
+        }
+
+        var lines = HttpUtils.split(headerPart, "\r\n");
+        if (lines.length() == 0) { return; }
+
+        # First line: HTTP/1.1 200 OK
+        var firstLine = lines.get(0);
+        var parts = HttpUtils.split(firstLine, " ");
+        if (parts.length() > 1) {
+            this.status = __native_string_to_int(parts.get(1));
+        }
+
+        this.headers = HttpUtils.parseHeaders(lines, 1);
+    }
+
+    func setStatus(code: Integer) {
+        this.status = code;
+    }
+
+    func setBody(content: String) {
+        this.body = content;
+        this.headers.put("Content-Length", StringUtils.length(content));
+    }
+
+    func addHeader(name: String, value: String) {
+        this.headers.put(name, value);
+    }
+
+    func toString() -> String {
+        var res = "HTTP/1.1 " + this.status + " OK\r\n";
+        var keys = this.headers.keys;
+        var i = 0;
+        while (i < keys.length()) {
+            var key = keys.get(i);
+            res = res + key + ": " + this.headers.get(key) + "\r\n";
+            i = i + 1;
+        }
+        res = res + "\r\n" + this.body;
+        return res;
+    }
+}
+
+class HttpRequest {
+    method: String,
+    path: String,
+    headers: Map<String, String>,
+    body: String
+
+    constructor(raw: String) {
+        this.headers = new Map<String, String>();
+        this.method = "GET";
+        this.path = "/";
+        this.body = "";
+
+        if (StringUtils.length(raw) == 0) { return; }
+
+        var headerEnd = StringUtils.indexOf(raw, "\r\n\r\n");
+        var headerPart = "";
+        if (headerEnd == -1) {
+            headerPart = raw;
+        } else {
+            headerPart = StringUtils.substring(raw, 0, headerEnd);
+            this.body = StringUtils.substring(raw, headerEnd + 4, StringUtils.length(raw));
+        }
+
+        var lines = HttpUtils.split(headerPart, "\r\n");
+        if (lines.length() == 0) { return; }
+
+        # First line: GET /path HTTP/1.1
+        var firstLine = lines.get(0);
+        var parts = HttpUtils.split(firstLine, " ");
+        if (parts.length() > 0) { this.method = parts.get(0); }
+        if (parts.length() > 1) { this.path = parts.get(1); }
+
+        this.headers = HttpUtils.parseHeaders(lines, 1);
+    }
+
+    func toString() -> String {
+        var res = this.method + " " + this.path + " HTTP/1.1\r\n";
+        var keys = this.headers.keys;
+        var i = 0;
+        var key = "";
+        while (i < keys.length()) {
+            key = keys.get(i);
+            res = res + key + ": " + this.headers.get(key) + "\r\n";
+            i = i + 1;
+        }
+        res = res + "\r\n" + this.body;
+        return res;
+    }
+}
+
+class HttpClient {
+    # Perform a basic HTTP GET request
+    static func get(host: String, path: String) -> HttpResponse {
+        return HttpClient.request("GET", host, path, "");
+    }
+
+    # Perform an HTTP POST request
+    static func post(host: String, path: String, body: String) -> HttpResponse {
+        return HttpClient.request("POST", host, path, body);
+    }
+
+    # Perform an HTTP PUT request
+    static func put(host: String, path: String, body: String) -> HttpResponse {
+        return HttpClient.request("PUT", host, path, body);
+    }
+
+    # Perform an HTTP DELETE request
+    static func delete(host: String, path: String) -> HttpResponse {
+        return HttpClient.request("DELETE", host, path, "");
+    }
+
+    # Generic request method used internally
+    static func request(method: String, host: String, path: String, body: String) -> HttpResponse {
+        var sock = Socket.create();
+        Socket.connect(sock, host, 80);
+        
+        var request = method + " " + path + " HTTP/1.1\r\n";
+        request = request + "Host: " + host + "\r\n";
+        request = request + "Connection: close\r\n";
+
+        var bodyLen = 0;
+        
+        if (StringUtils.length(body) > 0) {
+            bodyLen = StringUtils.length(body);
+            request = request + "Content-Length: " + bodyLen + "\r\n";
+            request = request + "Content-Type: application/x-www-form-urlencoded\r\n\r\n";
+            request = request + body;
+        } else {
+            request = request + "\r\n";
+        }
+        
+        Socket.send(sock, request);
+        
+        var response = "";
+        var chunk = "";
+
+        while (true) {
+            chunk = Socket.receive(sock, 8192);
+            if (StringUtils.length(chunk) == 0) { break; }
+            response = response + chunk;
+        }
+        
+        Socket.close(sock);
+        
+        return new HttpResponse(response);
+    }
+}
+
+class HttpServer {
+    # Starts a basic blocking HTTP Server on the given port
+    # @param port The port to listen on
+    # @param responseBody The HTML/Text payload to send to clients
+    static func startBasic(port: Integer, responseBody: String) {
+        var serverSock = Socket.create();
+        Socket.bind(serverSock, port);
+        Socket.listen(serverSock);
+        
+        println("HTTP Server listening on port " + port + "...");
+        
+        var clientSock;
+        var rawRequest;
+        var request;
+        var response = "";
+
+        while (true) {
+            # Accept blocks until a client connects
+            clientSock = Socket.accept(serverSock);
+            
+            # Read the incoming request (though we ignore the routing in this basic server)
+            rawRequest = Socket.receive(clientSock, 8192);
+            request = new HttpRequest(rawRequest);
+            
+            # Create a basic HTTP 200 response
+            response = "HTTP/1.1 200 OK\r\n";
+            response = response + "Content-Type: text/html\r\n";
+            response = response + "Connection: close\r\n\r\n";
+            response = response + responseBody;
+            
+            # Send payload and close
+            Socket.send(clientSock, response);
+            Socket.close(clientSock);
+        }
+    }
+
+    # Starts a dynamic HTTP Server with a custom handler
+    # @param port The port to listen on
+    # @param handler A function that takes an HttpRequest and returns an HttpResponse or String
+    static func listen(port: Integer, handler: Function) {
+        var serverSock = Socket.create();
+        Socket.bind(serverSock, port);
+        Socket.listen(serverSock);
+        
+        println("HTTP Server listening on port " + port + "...");
+        
+        var clientSock;
+        var rawRequest;
+        var request;
+        var response;
+        var responseStr;
+
+        while (true) {
+            clientSock = Socket.accept(serverSock);
+            rawRequest = Socket.receive(clientSock, 8192);
+            request = new HttpRequest(rawRequest);
+            
+            response = handler(request);
+            responseStr = response.toString();
+            
+            Socket.send(clientSock, responseStr);
+            Socket.close(clientSock);
+        }
+    }
+}
+
+class HttpRouter {
+    routes: Map<String, Map<String, Function>>
+
+    constructor() {
+        this.routes = new Map<String, Map<String, Function>>();
+    }
+
+    func add(method: String, path: String, handler: Function) {
+        var pathMap = this.routes.get(method);
+        if (pathMap == null) {
+            pathMap = new Map<String, Function>();
+            this.routes.put(method, pathMap);
+        }
+        pathMap.put(path, handler);
+    }
+
+    func handle(request: HttpRequest) -> HttpResponse {
+        println("="*70);
+        println(request.toString());
+        println("="*70);
+
+        var pathMap = this.routes.get(request.method);
+        if (pathMap ~= null) {
+            var handler = pathMap.get(request.path);
+            if (handler ~= null) {
+                return handler(request);
+            }
+        }
+        
+        var res = new HttpResponse("");
+        res.setStatus(404);
+        res.setBody("<html><body><h1>404 Not Found</h1></body></html>");
+        return res;
+    }
+}
