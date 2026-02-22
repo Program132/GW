@@ -110,6 +110,3 @@ class OS {
         return __native_get_pid();
     }
 }
-
-
-println(OS.getPID());
