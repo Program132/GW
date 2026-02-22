@@ -63,6 +63,8 @@ public:
   ConstructorDeclarationStatement *constructorDeclarationStatement();
   OperatorDeclarationStatement *operatorDeclarationStatement();
 
+  void skipGenericTypeArgs();
+
   friend std::ostream &operator<<(std::ostream &os, const Parser &parser);
 };
 

@@ -279,13 +279,18 @@ Expression *Parser::primary() {
       List<Token> typeArgs;
       if (checkType(TokenType::LESS_OPERATOR)) {
         advance(); // consume '<'
-        while (!checkType(TokenType::GREATER_OPERATOR) && !isAtEnd()) {
-          typeArgs.append(advance());
-          if (checkOperator(","))
-            advance();
+        int depth = 1;
+        while (depth > 0 && !isAtEnd()) {
+          Token t = advance();
+          if (t.getType() == TokenType::LESS_OPERATOR)
+            depth++;
+          else if (t.getType() == TokenType::GREATER_OPERATOR)
+            depth--;
+
+          if (depth > 0) {
+            typeArgs.append(t);
+          }
         }
-        consume(TokenType::GREATER_OPERATOR, ">",
-                "Expected '>' after type arguments");
       }
       return new VariableExpression(className, typeArgs);
     }
@@ -407,6 +412,7 @@ Parser::functionDeclarationStatement(bool isStatic) {
                     "Expected ':' after parameter name");
 
       Token paramTypeToken = this->advance();
+      this->skipGenericTypeArgs();
       List<Token> parameter;
       parameter.append(paramTypeToken);
       parameter.append(paramName);
@@ -423,6 +429,7 @@ Parser::functionDeclarationStatement(bool isStatic) {
   DataTypes returnType = DataTypes::Null;
   if (this->matchOperator("->")) {
     Token returnTypeToken = this->advance();
+    this->skipGenericTypeArgs();
     returnType = toDataTypes(returnTypeToken);
   }
 
@@ -554,6 +561,7 @@ StructDeclarationStatement *Parser::structDeclarationStatement() {
         throw std::runtime_error("Expected type after field name");
       }
       Token typeToken = this->advance();
+      this->skipGenericTypeArgs();
 
       List<Token> field;
       field.append(typeToken);
@@ -675,18 +683,7 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
         throw std::runtime_error("Expected type after field name");
       }
       Token typeToken = this->advance();
-      // Skip optional generic type params on field type: e.g. next: ListNode<T>
-      if (this->checkType(TokenType::LESS_OPERATOR)) {
-        this->advance(); // consume '<'
-        int depth = 1;
-        while (depth > 0 && !this->isAtEnd()) {
-          if (this->checkType(TokenType::LESS_OPERATOR))
-            depth++;
-          else if (this->checkType(TokenType::GREATER_OPERATOR))
-            depth--;
-          this->advance();
-        }
-      }
+      this->skipGenericTypeArgs();
 
       List<Token> field;
       field.append(typeToken);
@@ -721,6 +718,7 @@ ConstructorDeclarationStatement *Parser::constructorDeclarationStatement() {
                     "Expected ':' after parameter name");
 
       Token paramTypeToken = this->advance();
+      this->skipGenericTypeArgs();
       List<Token> parameter;
       parameter.append(paramTypeToken);
       parameter.append(paramName);
@@ -758,6 +756,7 @@ OperatorDeclarationStatement *Parser::operatorDeclarationStatement() {
                     "Expected ':' after parameter name");
 
       Token paramTypeToken = this->advance();
+      this->skipGenericTypeArgs();
       List<Token> parameter;
       parameter.append(paramTypeToken);
       parameter.append(paramName);
@@ -775,6 +774,7 @@ OperatorDeclarationStatement *Parser::operatorDeclarationStatement() {
   DataTypes returnType = DataTypes::Null;
   if (this->matchOperator("->")) {
     Token returnTypeToken = this->advance();
+    this->skipGenericTypeArgs();
     returnType = toDataTypes(returnTypeToken);
   }
 
@@ -783,4 +783,18 @@ OperatorDeclarationStatement *Parser::operatorDeclarationStatement() {
   BlockStatement *body = this->blockStatement();
 
   return new OperatorDeclarationStatement(op, parameters, body, returnType);
+}
+
+void Parser::skipGenericTypeArgs() {
+  if (this->checkType(TokenType::LESS_OPERATOR)) {
+    this->advance(); // consume '<'
+    int depth = 1;
+    while (depth > 0 && !this->isAtEnd()) {
+      if (this->checkType(TokenType::LESS_OPERATOR))
+        depth++;
+      else if (this->checkType(TokenType::GREATER_OPERATOR))
+        depth--;
+      this->advance();
+    }
+  }
 }
