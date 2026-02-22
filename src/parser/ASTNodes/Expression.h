@@ -86,10 +86,15 @@ public:
 };
 
 class VariableExpression : public Expression {
+private:
+  List<Token> typeArgs;
+
 public:
   VariableExpression(Token name);
+  VariableExpression(Token name, List<Token> typeArgs);
 
   Token getName() const;
+  List<Token> getTypeArgs() const;
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const VariableExpression &variableExpression);

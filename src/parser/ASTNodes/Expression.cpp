@@ -129,7 +129,10 @@ std::ostream &operator<<(std::ostream &os,
 // VARIABLE: token = name
 VariableExpression::VariableExpression(Token name)
     : Expression(VARIABLE, name) {}
+VariableExpression::VariableExpression(Token name, List<Token> typeArgs)
+    : Expression(VARIABLE, name), typeArgs(typeArgs) {}
 Token VariableExpression::getName() const { return token; }
+List<Token> VariableExpression::getTypeArgs() const { return typeArgs; }
 
 std::ostream &operator<<(std::ostream &os,
                          const VariableExpression &variableExpression) {

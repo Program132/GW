@@ -251,11 +251,32 @@ void Lexer::lex() {
     }
 
     // Conditional operators Managamenet : <, >, ==, >=, <=, ~=
-    else if (c == '<') {
+    else if (c == '<' && code[i + 1] == '=') {
+      if (this->current.getType() != TokenType::POSSIBLE_STRING) {
+        this->appendToken();
+        this->current =
+            Token(TokenType::LESS_EQUAL_OPERATOR, std::string("<="), line);
+        this->appendToken();
+        i++;
+      } else {
+        this->current.appendCharacter(c);
+      }
+    } else if (c == '<') {
       if (this->current.getType() != TokenType::POSSIBLE_STRING) {
         this->appendToken();
         this->current =
             Token(TokenType::LESS_OPERATOR, std::string(1, c), line);
+        this->appendToken();
+      } else {
+        this->current.appendCharacter(c);
+      }
+    } else if (c == '>' && code[i + 1] == '=') {
+      if (this->current.getType() != TokenType::POSSIBLE_STRING) {
+        this->appendToken();
+        this->current =
+            Token(TokenType::GREATER_EQUAL_OPERATOR, std::string(">="), line);
+        this->appendToken();
+        i++;
       } else {
         this->current.appendCharacter(c);
       }
@@ -264,55 +285,39 @@ void Lexer::lex() {
         this->appendToken();
         this->current =
             Token(TokenType::GREATER_OPERATOR, std::string(1, c), line);
+        this->appendToken();
       } else {
         this->current.appendCharacter(c);
       }
     } else if (c == '~') {
       if (this->current.getType() != TokenType::POSSIBLE_STRING) {
         this->appendToken();
-        this->current = Token(TokenType::OPERATOR, std::string(1, c), line);
+        if (code[i + 1] == '=') {
+          this->current =
+              Token(TokenType::DIFFERENT_OPERATOR, std::string("~="), line);
+          this->appendToken();
+          i++;
+        } else {
+          this->current = Token(TokenType::OPERATOR, std::string(1, c), line);
+          this->appendToken();
+        }
       } else {
         this->current.appendCharacter(c);
       }
     } else if (c == '=') {
       if (this->current.getType() != TokenType::POSSIBLE_STRING) {
-
-        // ==
-        if (this->current.getType() == TokenType::EQUAL_OPERATOR) {
-          this->current.setType(TokenType::DOUBLE_EQUAL_OPERATOR);
-          this->current.appendCharacter(c);
+        this->appendToken();
+        if (code[i + 1] == '=') {
+          this->current =
+              Token(TokenType::DOUBLE_EQUAL_OPERATOR, std::string("=="), line);
           this->appendToken();
-        }
-        // <=
-        else if (this->current.getType() == TokenType::LESS_OPERATOR) {
-          this->current.setType(TokenType::LESS_EQUAL_OPERATOR);
-          this->current.appendCharacter(c);
-          this->appendToken();
-        }
-        // >=
-        else if (this->current.getType() == TokenType::GREATER_OPERATOR) {
-          this->current.setType(TokenType::GREATER_EQUAL_OPERATOR);
-          this->current.appendCharacter(c);
-          this->appendToken();
-        }
-        // ~=
-        else if (this->current.getType() == TokenType::OPERATOR &&
-                 this->current.getValue() == "~") {
-          this->current.setType(TokenType::DIFFERENT_OPERATOR);
-          this->current.appendCharacter(c);
-          this->appendToken();
-        }
-        // =
-        else {
-          this->appendToken();
+          i++;
+        } else {
           this->current =
               Token(TokenType::EQUAL_OPERATOR, std::string(1, c), line);
+          this->appendToken();
         }
       } else {
-        if (this->current.getType() != TokenType::POSSIBLE_STRING) {
-          this->current.setType(TokenType::IDENTIFIER);
-          this->current.setLine(line);
-        }
         this->current.appendCharacter(c);
       }
     } else {

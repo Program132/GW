@@ -36,6 +36,13 @@ Value::Value(std::string structName, std::map<std::string, Value> *members)
   structMembers = std::make_shared<std::map<std::string, Value>>(*members);
 }
 
+Value::Value(std::string structName, std::map<std::string, Value> *members,
+             std::vector<std::string> typeArgs)
+    : type(VAL_STRUCT), intValue(0), structName(structName),
+      typeArgs(typeArgs) {
+  structMembers = std::make_shared<std::map<std::string, Value>>(*members);
+}
+
 Value::Value(ValueType type, const std::string &value)
     : type(type), intValue(0), stringValue(value), structMembers(nullptr),
       structName("") {
@@ -49,7 +56,7 @@ Value::Value(NativeFunction func)
 
 Value::Value(const Value &other)
     : type(other.type), structMembers(other.structMembers),
-      structName(other.structName) {
+      structName(other.structName), typeArgs(other.typeArgs) {
   switch (type) {
   case VAL_INTEGER:
     intValue = other.intValue;
@@ -89,6 +96,7 @@ Value &Value::operator=(const Value &other) {
     type = other.type;
     structName = other.structName;
     structMembers = other.structMembers;
+    typeArgs = other.typeArgs;
 
     switch (type) {
     case VAL_INTEGER:

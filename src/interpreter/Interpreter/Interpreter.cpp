@@ -541,7 +541,16 @@ Value Interpreter::evaluate(Expression *expression) {
           }
         }
 
-        Value instance(name, &members);
+        std::vector<std::string> typeArgs;
+        if (calleeExpr->getType() == VARIABLE) {
+          VariableExpression *varExpr = (VariableExpression *)calleeExpr;
+          for (int i = 0; i < varExpr->getTypeArgs().size(); i++) {
+            typeArgs.push_back(environment->resolveType(
+                varExpr->getTypeArgs().get(i).getValue()));
+          }
+        }
+
+        Value instance(name, &members, typeArgs);
 
         if (constructor != nullptr) {
           List<Value> evaluatedArgs;
@@ -552,12 +561,22 @@ Value Interpreter::evaluate(Expression *expression) {
           Environment *ctorEnv = new Environment(environment);
           ctorEnv->addVariable("this", instance, name); // Allow binding 'this'
 
+          // Add type mappings to constructor environment
+          for (int t = 0; t < cls->getTypeParams().size(); t++) {
+            if (t < typeArgs.size()) {
+              ctorEnv->addTypeMapping(cls->getTypeParams().get(t).getValue(),
+                                      typeArgs[t]);
+            }
+          }
+
           for (int i = 0; i < evaluatedArgs.size(); i++) {
             Token paramNameToken = constructor->getParams().get(i).get(1);
             Token paramTypeToken = constructor->getParams().get(i).get(0);
+            std::string paramType =
+                ctorEnv->resolveType(paramTypeToken.getValue());
+
             ctorEnv->addVariable(paramNameToken.getValue(),
-                                 evaluatedArgs.get(i),
-                                 paramTypeToken.getValue());
+                                 evaluatedArgs.get(i), paramType);
           }
 
           Environment *previousEnv = environment;
@@ -678,12 +697,23 @@ Value Interpreter::evaluate(Expression *expression) {
         Environment *methodEnv = new Environment(environment);
         methodEnv->addVariable("this", object, className);
 
+        // Add type mappings to method environment from the object instance
+        const std::vector<std::string> &typeArgs = object.typeArgs;
+        for (int t = 0; t < cls->getTypeParams().size(); t++) {
+          if (t < typeArgs.size()) {
+            methodEnv->addTypeMapping(cls->getTypeParams().get(t).getValue(),
+                                      typeArgs[t]);
+          }
+        }
+
         for (int i = 0; i < evaluatedArgs.size(); i++) {
           Token paramNameToken = method->getParams().get(i).get(1);
           Token paramTypeToken = method->getParams().get(i).get(0);
+          std::string paramType =
+              methodEnv->resolveType(paramTypeToken.getValue());
+
           methodEnv->addVariable(paramNameToken.getValue(),
-                                 evaluatedArgs.get(i),
-                                 paramTypeToken.getValue());
+                                 evaluatedArgs.get(i), paramType);
         }
 
         Environment *previousEnv = environment;

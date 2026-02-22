@@ -20,7 +20,6 @@ enum ValueType {
 #include <functional>
 #include <vector>
 
-
 class Value;
 using NativeFunction = std::function<Value(const std::vector<Value> &)>;
 
@@ -36,6 +35,8 @@ private:
   std::string stringValue;
   std::shared_ptr<std::map<std::string, Value>> structMembers;
   std::string structName;
+  std::vector<std::string>
+      typeArgs; // Generic type arguments for classes/structs
 
   // Store native function
   NativeFunction nativeFunc;
@@ -52,6 +53,8 @@ public:
   Value(char value);
   Value(bool value);
   Value(std::string structName, std::map<std::string, Value> *members);
+  Value(std::string structName, std::map<std::string, Value> *members,
+        std::vector<std::string> typeArgs);
   Value(ValueType type, const std::string &value);
   Value(NativeFunction func); // Constructor for native functions
 

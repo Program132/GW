@@ -15,6 +15,7 @@ private:
   std::map<std::string, Function> functions;
   std::map<std::string, StructDeclarationStatement *> structs;
   std::map<std::string, ClassDeclarationStatement *> classes;
+  std::map<std::string, std::string> typeMappings; // Generic type mappings
 
 public:
   Environment() : parent(nullptr) {}
@@ -140,6 +141,20 @@ public:
       return parent->getFunction(name);
     }
     return Function();
+  }
+
+  void addTypeMapping(const std::string &param, const std::string &actual) {
+    typeMappings[param] = actual;
+  }
+
+  std::string resolveType(const std::string &type) {
+    if (typeMappings.find(type) != typeMappings.end()) {
+      return typeMappings[type];
+    }
+    if (parent != nullptr) {
+      return parent->resolveType(type);
+    }
+    return type;
   }
 };
 
