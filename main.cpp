@@ -74,6 +74,9 @@ void registerNatives(Interpreter &interpreter) {
   // String.h
   interpreter.addNativeFunction("__native_string_length", __nativeStringLength);
   interpreter.addNativeFunction("__native_string_at", __nativeStringAt);
+  interpreter.addNativeFunction("__native_string_to_int", __nativeStringToInt);
+  interpreter.addNativeFunction("__native_string_to_double",
+                                __nativeStringToDouble);
 }
 
 void runAllTests() {
