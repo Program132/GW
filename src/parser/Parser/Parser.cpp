@@ -666,6 +666,18 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
         throw std::runtime_error("Expected type after field name");
       }
       Token typeToken = this->advance();
+      // Skip optional generic type params on field type: e.g. next: ListNode<T>
+      if (this->checkType(TokenType::LESS_OPERATOR)) {
+        this->advance(); // consume '<'
+        int depth = 1;
+        while (depth > 0 && !this->isAtEnd()) {
+          if (this->checkType(TokenType::LESS_OPERATOR))
+            depth++;
+          else if (this->checkType(TokenType::GREATER_OPERATOR))
+            depth--;
+          this->advance();
+        }
+      }
 
       List<Token> field;
       field.append(typeToken);
