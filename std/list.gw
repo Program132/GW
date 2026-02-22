@@ -1,0 +1,95 @@
+class ListNode<T> {
+    value: T,
+    next: ListNode<T>
+
+    constructor(value: T) {
+        this.value = value;
+        this.next = null;
+    }
+}
+
+class List<T> {
+    head: ListNode<T>
+    tail: ListNode<T>
+    size: Integer
+
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    func append(value: T) {
+        var newNode = new ListNode<T>(value);
+        if (this.head == null) {
+            this.head = newNode;
+            this.tail = newNode;
+        } else {
+            this.tail.next = newNode;
+            this.tail = newNode;
+        }
+        this.size = this.size + 1;
+    }
+
+    func get(index: Integer) -> T {
+        if (index < 0 || index >= this.size) {
+            return null;
+        }
+        var current = this.head;
+        for (var i = 0; i < index; i = i + 1) {
+            current = current.next;
+        }
+        return current.value;
+    }
+
+    func set(index: Integer, value: T) {
+        if (index < 0 || index >= this.size) {
+            return;
+        }
+        var current = this.head;
+        for (var i = 0; i < index; i = i + 1) {
+            current = current.next;
+        }
+        current.value = value;
+    }
+
+    func pop() -> T {
+        if (this.head == null) {
+            return null;
+        }
+        var value = this.head.value;
+        this.head = this.head.next;
+        this.size = this.size - 1;
+        return value;
+    }
+
+    func clear() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    func sum() -> T {
+        var sum = 0;
+        var current = this.head;
+        while (current ~= null) {
+            sum = sum + current.value;
+            current = current.next;
+        }
+        return sum;
+    }
+
+    func product() -> T {
+        var product = 1;
+        var current = this.head;
+        while (current ~= null) {
+            product = product * current.value;
+            current = current.next;
+        }
+        return product;
+    }
+
+    func length() -> Integer {
+        return this.size;
+    }
+}
