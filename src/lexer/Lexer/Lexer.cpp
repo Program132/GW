@@ -169,7 +169,9 @@ void Lexer::lex() {
 
     // String Management :
     else if (c == '"') {
-      if (this->current.getType() == TokenType::WHITESPACE) {
+      if (this->current.getType() == TokenType::POSSIBLE_CHAR) {
+        this->current.appendCharacter(c);
+      } else if (this->current.getType() == TokenType::WHITESPACE) {
         this->current.setType(TokenType::POSSIBLE_STRING);
         this->current.setLine(line);
       } else if (this->current.getType() == TokenType::POSSIBLE_STRING) {
@@ -179,7 +181,9 @@ void Lexer::lex() {
     }
 
     else if (c == '\'') {
-      if (this->current.getType() == TokenType::WHITESPACE) {
+      if (this->current.getType() == TokenType::POSSIBLE_STRING) {
+        this->current.appendCharacter(c);
+      } else if (this->current.getType() == TokenType::WHITESPACE) {
         this->current.setType(TokenType::POSSIBLE_CHAR);
         this->current.setLine(line);
       } else if (this->current.getType() == TokenType::POSSIBLE_CHAR) {
