@@ -1,0 +1,53 @@
+import "list.gw";
+
+class Map<K, V> {
+    keys: List<K>,
+    values: List<V>
+
+    constructor() {
+        this.keys = new List<K>();
+        this.values = new List<V>();
+    }
+
+    func put(key: K, value: V) {
+        var index = this.keys.indexOf(key);
+        if (index == -1) {
+            this.keys.append(key);
+            this.values.append(value);
+        } else {
+            this.values.set(index, value);
+        }
+        return null;
+    }
+
+    func get(key: K) -> V {
+        var index = this.keys.indexOf(key);
+        if (index == -1) {
+            return null;
+        }
+        return this.values.get(index);
+    }
+
+    func remove(key: K) {
+        var index = this.keys.indexOf(key);
+        if (index ~= -1) {
+            this.keys.remove(index);
+            this.values.remove(index);
+        }
+        return null;
+    }
+
+    func contains(key: K) -> Boolean {
+        return this.keys.contains(key);
+    }
+
+    func size() -> Integer {
+        return this.keys.length();
+    }
+
+    func clear() {
+        this.keys.clear();
+        this.values.clear();
+        return null;
+    }
+}
