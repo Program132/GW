@@ -82,7 +82,7 @@ void Interpreter::execute(Statement *statement) {
       value = evaluate(statement->getExpression());
     }
 
-    if (environment->variableExist(varName)) {
+    if (environment->variableExistInCurrentScope(varName)) {
       std::cerr << "[ERROR] Variable '" << varName << "' already defined"
                 << std::endl;
       return;
@@ -216,6 +216,9 @@ Value Interpreter::evaluate(Expression *expression) {
     if (environment->classExist(varName)) {
       // Return a Value representing the Class itself
       return Value(VAL_CLASS, varName);
+    }
+    if (environment->functionExist(varName)) {
+      return Value(VAL_FUNCTION, varName);
     }
     throw std::runtime_error("Undefined variable '" + varName + "'");
   }
@@ -625,6 +628,50 @@ Value Interpreter::evaluate(Expression *expression) {
             evaluatedArgs.push_back(evaluate(argExprs.get(i)));
           }
           return val.asNativeFunction()(evaluatedArgs);
+        } else if (val.getType() == VAL_FUNCTION) {
+          std::string funcName = val.asString();
+          Function func = environment->getFunction(funcName);
+          List<Expression *> argExprs =
+              ((CallExpression *)expression)->getArguments();
+
+          if (argExprs.size() != func.params.size()) {
+            throw std::runtime_error("Function '" + funcName + "' expects " +
+                                     std::to_string(func.params.size()) +
+                                     " arguments but got " +
+                                     std::to_string(argExprs.size()));
+          }
+
+          List<Value> evaluatedArgs;
+          for (int i = 0; i < argExprs.size(); i++) {
+            evaluatedArgs.append(evaluate(argExprs.get(i)));
+          }
+
+          Environment *funcEnv = new Environment(environment);
+
+          for (int i = 0; i < evaluatedArgs.size(); i++) {
+            Token paramNameToken = func.params.get(i).get(1);
+            Token paramTypeToken = func.params.get(i).get(0);
+            funcEnv->addVariable(paramNameToken.getValue(),
+                                 evaluatedArgs.get(i),
+                                 paramTypeToken.getValue());
+          }
+
+          Environment *previousEnv = environment;
+          environment = funcEnv;
+
+          Value returnValue;
+          try {
+            for (int i = 0; i < func.body.getStatements().size(); i++) {
+              execute(func.body.getStatements().get(i));
+            }
+          } catch (const ReturnException &e) {
+            returnValue = e.value;
+          }
+
+          environment = previousEnv;
+          delete funcEnv;
+
+          return returnValue;
         }
       }
 
