@@ -267,6 +267,28 @@ Expression *Parser::primary() {
   }
 
   if (checkType(TokenType::IDENTIFIER)) {
+    // Handle 'new ClassName<T>()' — skip optional generic type params
+    if (peek().getValue() == "new") {
+      advance(); // consume 'new'
+      if (!checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected class name after 'new' at line " +
+                                 std::to_string(peek().getLine()));
+      }
+      Token className = advance(); // consume class name
+      // Skip optional generic type params: <Integer>, <T>, etc.
+      if (checkType(TokenType::LESS_OPERATOR)) {
+        advance(); // consume '<'
+        int depth = 1;
+        while (depth > 0 && !isAtEnd()) {
+          if (checkType(TokenType::LESS_OPERATOR))
+            depth++;
+          else if (checkType(TokenType::GREATER_OPERATOR))
+            depth--;
+          advance();
+        }
+      }
+      return new VariableExpression(className);
+    }
     advance();
     return new VariableExpression(this->previous());
   }
@@ -555,6 +577,24 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
   Token name = this->advance();
 
   Token superclass = Token();
+  List<Token> typeParams;
+
+  // Parse optional generic type parameters: class Foo<T, K> { ... }
+  if (this->checkType(TokenType::LESS_OPERATOR)) {
+    this->advance(); // consume '<'
+    while (!this->checkType(TokenType::GREATER_OPERATOR) && !this->isAtEnd()) {
+      if (!this->checkType(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("Expected type parameter name at line " +
+                                 std::to_string(peek().getLine()));
+      }
+      typeParams.append(this->advance());
+      if (this->checkOperator(","))
+        this->advance();
+    }
+    this->consume(TokenType::GREATER_OPERATOR, ">",
+                  "Expected '>' after type parameters");
+  }
+
   if (this->checkType(TokenType::EXTENDS)) {
     this->advance();
     if (peek().getType() != TokenType::IDENTIFIER) {
@@ -640,8 +680,8 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
 
   this->consume(TokenType::OPERATOR, "}", "Expected '}' after class body");
 
-  return new ClassDeclarationStatement(name, superclass, fields, methods,
-                                       constructors, operators);
+  return new ClassDeclarationStatement(name, superclass, typeParams, fields,
+                                       methods, constructors, operators);
 }
 
 ConstructorDeclarationStatement *Parser::constructorDeclarationStatement() {

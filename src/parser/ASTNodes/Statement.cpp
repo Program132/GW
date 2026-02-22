@@ -212,17 +212,21 @@ BlockStatement *ConstructorDeclarationStatement::getBody() const {
 }
 
 ClassDeclarationStatement::ClassDeclarationStatement(
-    Token name, Token superclass, List<List<Token>> fields,
-    List<FunctionDeclarationStatement *> methods,
+    Token name, Token superclass, List<Token> typeParams,
+    List<List<Token>> fields, List<FunctionDeclarationStatement *> methods,
     List<ConstructorDeclarationStatement *> constructors,
     List<OperatorDeclarationStatement *> operators)
     : Statement(CLASS_DECLARATION, name), name(name), superclass(superclass),
-      fields(fields), methods(methods), constructors(constructors),
-      operators(operators) {}
+      typeParams(typeParams), fields(fields), methods(methods),
+      constructors(constructors), operators(operators) {}
 
 Token ClassDeclarationStatement::getName() const { return name; }
 
 Token ClassDeclarationStatement::getSuperclass() const { return superclass; }
+
+List<Token> ClassDeclarationStatement::getTypeParams() const {
+  return typeParams;
+}
 
 List<List<Token>> ClassDeclarationStatement::getFields() const {
   return fields;
