@@ -1,0 +1,256 @@
+class StringUtils {
+    # Returns the lower-case version of a character
+    # @param c The character to convert
+    # @return The lower-case version of the character
+    static func charToLower(c: String) -> String {
+        if (c == "A") { return "a"; } 
+        if (c == "B") { return "b"; }
+        if (c == "C") { return "c"; }
+        if (c == "D") { return "d"; }
+        if (c == "E") { return "e"; }
+        if (c == "F") { return "f"; }
+        if (c == "G") { return "g"; }
+        if (c == "H") { return "h"; }
+        if (c == "I") { return "i"; }
+        if (c == "J") { return "j"; }
+        if (c == "K") { return "k"; }
+        if (c == "L") { return "l"; }
+        if (c == "M") { return "m"; }
+        if (c == "N") { return "n"; }
+        if (c == "O") { return "o"; }
+        if (c == "P") { return "p"; }
+        if (c == "Q") { return "q"; }
+        if (c == "R") { return "r"; }
+        if (c == "S") { return "s"; }
+        if (c == "T") { return "t"; }
+        if (c == "U") { return "u"; }
+        if (c == "V") { return "v"; }
+        if (c == "W") { return "w"; }
+        if (c == "X") { return "x"; }
+        if (c == "Y") { return "y"; }
+        if (c == "Z") { return "z"; }
+        return c;
+    }
+
+    # Returns the upper-case version of a character
+    # @param c The character to convert
+    # @return The upper-case version of the character
+    static func charToUpper(c: String) -> String {
+        if (c == "a") { return "A"; }
+        if (c == "b") { return "B"; }
+        if (c == "c") { return "C"; }
+        if (c == "d") { return "D"; }
+        if (c == "e") { return "E"; }
+        if (c == "f") { return "F"; }
+        if (c == "g") { return "G"; }
+        if (c == "h") { return "H"; }
+        if (c == "i") { return "I"; }
+        if (c == "j") { return "J"; }
+        if (c == "k") { return "K"; }
+        if (c == "l") { return "L"; }
+        if (c == "m") { return "M"; }
+        if (c == "n") { return "N"; }
+        if (c == "o") { return "O"; }
+        if (c == "p") { return "P"; }
+        if (c == "q") { return "Q"; }
+        if (c == "r") { return "R"; }
+        if (c == "s") { return "S"; }
+        if (c == "t") { return "T"; }
+        if (c == "u") { return "U"; }
+        if (c == "v") { return "V"; }
+        if (c == "w") { return "W"; }
+        if (c == "x") { return "X"; }
+        if (c == "y") { return "Y"; }
+        if (c == "z") { return "Z"; }
+        return c;
+    }
+
+    # Returns the entire string in lower case
+    # @param str The string to convert
+    # @return The lower-case version of the string
+    static func toLower(str: String) -> String {
+        var result = "";
+        var i = 0;
+        var len = __native_string_length(str);
+        while (i < len) {
+            result = result + StringUtils.charToLower("" + __native_string_at(str, i));
+            i = i + 1;
+        }
+        return result;
+    }
+
+    # Returns the entire string in upper case
+    # @param str The string to convert
+    # @return The upper-case version of the string
+    static func toUpper(str: String) -> String {
+        var result = "";
+        var i = 0;
+        var len = __native_string_length(str);
+        while (i < len) {
+            result = result + StringUtils.charToUpper("" + __native_string_at(str, i));
+            i = i + 1;
+        }
+        return result;
+    }
+
+    # Returns a substring
+    # @param str The string to extract the substring from
+    # @param start The starting index of the substring
+    # @param end The ending index of the substring
+    # @return The substring
+    static func substring(str: String, start: Integer, end: Integer) -> String {
+        var result = "";
+        var idx = start;
+        while (idx < end) {
+            result = result + ("" + __native_string_at(str, idx));
+            idx = idx + 1;
+        }
+        return result;
+    }
+
+    # Checks if string contains a substring
+    # @param str The string to search in
+    # @param search The substring to search for
+    # @return True if the string contains the substring, false otherwise
+    static func contains(str: String, search: String) -> Boolean {
+        var len = __native_string_length(str);
+        var searchLen = __native_string_length(search);
+        if (searchLen == 0) { return true; }
+        if (searchLen > len) { return false; }
+        
+        var i = 0;
+        var sub = "";
+        while (i <= (len - searchLen)) {
+            sub = StringUtils.substring(str, i, i + searchLen);
+            if (sub == search) {
+                return true;
+            }
+            i = i + 1;
+        }
+        return false;
+    }
+
+    # Returns the index of a substring or -1 if not found
+    # @param str The string to search in
+    # @param search The substring to search for
+    # @return The index of the substring or -1 if not found
+    static func indexOf(str: String, search: String) -> Integer {
+        var len = __native_string_length(str);
+        var searchLen = __native_string_length(search);
+        if (searchLen == 0) { return 0; }
+        
+        var i = 0;
+        var sub = "";
+        while (i <= (len - searchLen)) {
+            sub = StringUtils.substring(str, i, i + searchLen);
+            if (sub == search) {
+                return i;
+            }
+            i = i + 1;
+        }
+        return -1;
+    }
+
+    # Basic trim (removes spaces at start and end)
+    # @param str The string to trim
+    # @return The trimmed string
+    static func trim(str: String) -> String {
+        var len = __native_string_length(str);
+        if (len == 0) { return ""; }
+        
+        var start = 0;
+        while (start < len && ("" + __native_string_at(str, start)) == " ") {
+            start = start + 1;
+        }
+        
+        var end = len;
+        while (end > start && ("" + __native_string_at(str, end - 1)) == " ") {
+            end = end - 1;
+        }
+        
+        return StringUtils.substring(str, start, end);
+    }
+
+    # Get character at index given
+    # @return The character at the given index
+    static func charAt(str: String, index: Integer) -> String {
+        return __native_string_at(str, index);
+    }
+
+    # Get length of string
+    # @return The length of the string
+    static func length(str: String) -> Integer {
+        return __native_string_length(str);
+    }
+
+    # Get substring
+    # @return The substring
+    static func substring(str: String, start: Integer, end: Integer) -> String {
+        var result = "";
+        var i = start;
+        while (i < end) {
+            result = result + __native_string_at(str, i);
+            i = i + 1;
+        }
+        return result;
+    }
+}
+
+class StringBuilder {
+    content: String
+
+    # Initializes a new instance of the StringBuilder class
+    constructor() {
+        this.content = "";
+    }
+
+    # Initializes a new instance of the StringBuilder class with the specified initial string
+    constructor(initial: String) {
+        this.content = initial;
+    }
+
+    # Appends the specified string to the end of the StringBuilder
+    # @param str The string to append
+    func append(str: String) {
+        this.content = this.content + str;
+    }
+
+    # Appends the specified string to the end of the StringBuilder and adds a newline character
+    # @param str The string to append
+    func appendLine(str: String) {
+        this.content = this.content + str + "\n";
+    }
+
+    # Returns the string representation of the StringBuilder
+    # @return The string representation of the StringBuilder
+    func toString() -> String {
+        return this.content;
+    }
+
+    # Returns the length of the StringBuilder
+    # @return The length of the StringBuilder
+    func length() -> Integer {
+        return __native_string_length(this.content);
+    }
+
+    # Clears the StringBuilder
+    func clear() {
+        this.content = "";
+    }
+
+    # Converts the StringBuilder to lower case
+    func toLower() {
+        this.content = StringUtils.toLower(this.content);
+    }
+
+    # Converts the StringBuilder to upper case
+    func toUpper() {
+        this.content = StringUtils.toUpper(this.content);
+    }
+
+    # Set content
+    # @param str The string to set
+    func setContent(str: String) {
+        this.content = str;
+    }
+}
