@@ -85,6 +85,10 @@ public:
     return false;
   }
 
+  bool variableExistInCurrentScope(const std::string &name) {
+    return variables.find(name) != variables.end();
+  }
+
   Value getVariableValue(const std::string &name) {
     if (variables.find(name) != variables.end()) {
       return variables[name];
