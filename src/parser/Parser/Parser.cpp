@@ -276,18 +276,18 @@ Expression *Parser::primary() {
       }
       Token className = advance(); // consume class name
       // Skip optional generic type params: <Integer>, <T>, etc.
+      List<Token> typeArgs;
       if (checkType(TokenType::LESS_OPERATOR)) {
         advance(); // consume '<'
-        int depth = 1;
-        while (depth > 0 && !isAtEnd()) {
-          if (checkType(TokenType::LESS_OPERATOR))
-            depth++;
-          else if (checkType(TokenType::GREATER_OPERATOR))
-            depth--;
-          advance();
+        while (!checkType(TokenType::GREATER_OPERATOR) && !isAtEnd()) {
+          typeArgs.append(advance());
+          if (checkOperator(","))
+            advance();
         }
+        consume(TokenType::GREATER_OPERATOR, ">",
+                "Expected '>' after type arguments");
       }
-      return new VariableExpression(className);
+      return new VariableExpression(className, typeArgs);
     }
     advance();
     return new VariableExpression(this->previous());
@@ -308,6 +308,10 @@ Statement *Parser::statement() {
   if (checkOperator("{")) {
     advance();
     return blockStatement();
+  }
+
+  if (matchOperator(";")) {
+    return (Statement *)new ExpressionStatement(new EmptyExpression());
   }
 
   if (checkIdentifier("print")) {
@@ -582,14 +586,19 @@ ClassDeclarationStatement *Parser::classDeclarationStatement() {
   // Parse optional generic type parameters: class Foo<T, K> { ... }
   if (this->checkType(TokenType::LESS_OPERATOR)) {
     this->advance(); // consume '<'
-    while (!this->checkType(TokenType::GREATER_OPERATOR) && !this->isAtEnd()) {
-      if (!this->checkType(TokenType::IDENTIFIER)) {
-        throw std::runtime_error("Expected type parameter name at line " +
-                                 std::to_string(peek().getLine()));
+    if (!this->checkType(TokenType::GREATER_OPERATOR)) {
+      while (true) {
+        if (!this->checkType(TokenType::IDENTIFIER)) {
+          throw std::runtime_error("Expected type parameter name at line " +
+                                   std::to_string(peek().getLine()) +
+                                   " but got type " +
+                                   std::to_string(peek().getType()) +
+                                   " value '" + peek().getValue() + "'");
+        }
+        typeParams.append(this->advance());
+        if (!this->matchOperator(","))
+          break;
       }
-      typeParams.append(this->advance());
-      if (this->checkOperator(","))
-        this->advance();
     }
     this->consume(TokenType::GREATER_OPERATOR, ">",
                   "Expected '>' after type parameters");
