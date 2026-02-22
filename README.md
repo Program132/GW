@@ -120,6 +120,8 @@ Standard library:
 | 🕛 **[Time](doc/std/time.md)** | Time and Date Standard Library: Time native functions application. |
 | 🖥️ **[OS](doc/std/os.md)** | OS Standard Library: System / OS native functions application. |
 | 📂 **[IO](doc/std/io.md)** | File and Console Standard Library: IO native functions application. |
+| 📝 **[String](doc/std/strings.md)** | String Utilities & StringBuilder Standard Library. |
+| 🌐 **[HTTP](doc/std/http.md)** | HTTP Client & Basic Web Server implementation. |
 
 ## Compile & Run
 
