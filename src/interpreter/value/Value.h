@@ -14,7 +14,8 @@ enum ValueType {
   VAL_STRUCT,
   VAL_CLASS,
   VAL_CHAR,
-  VAL_NATIVE_FUNCTION
+  VAL_NATIVE_FUNCTION,
+  VAL_FUNCTION
 };
 
 #include <functional>
@@ -82,6 +83,7 @@ public:
   bool isNull() const;
   bool isNumber() const;
   bool isNativeFunction() const;
+  bool isFunction() const;
 
   std::string toString() const;
   double toNumber() const;

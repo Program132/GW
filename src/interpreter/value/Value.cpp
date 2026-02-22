@@ -66,6 +66,7 @@ Value::Value(const Value &other)
     break;
   case VAL_STRING:
   case VAL_CLASS:
+  case VAL_FUNCTION:
     new (&stringValue) std::string(other.stringValue);
     break;
   case VAL_BOOLEAN:
@@ -107,6 +108,7 @@ Value &Value::operator=(const Value &other) {
       break;
     case VAL_STRING:
     case VAL_CLASS:
+    case VAL_FUNCTION:
       new (&stringValue) std::string(other.stringValue);
       break;
     case VAL_BOOLEAN:
@@ -127,7 +129,7 @@ Value &Value::operator=(const Value &other) {
 }
 
 Value::~Value() {
-  if (type == VAL_STRING || type == VAL_CLASS) {
+  if (type == VAL_STRING || type == VAL_CLASS || type == VAL_FUNCTION) {
     stringValue.~basic_string();
   }
   // shared_ptr handles structMembers deletion
@@ -150,9 +152,7 @@ double Value::asDouble() const {
 }
 
 std::string Value::asString() const {
-  if (type == VAL_STRING)
-    return stringValue;
-  if (type == VAL_CLASS)
+  if (type == VAL_STRING || type == VAL_CLASS || type == VAL_FUNCTION)
     return stringValue;
   throw std::runtime_error("Value is not a string or class name");
 }
@@ -192,6 +192,7 @@ bool Value::isNumber() const {
 }
 
 bool Value::isNativeFunction() const { return type == VAL_NATIVE_FUNCTION; }
+bool Value::isFunction() const { return type == VAL_FUNCTION; }
 
 std::string Value::toString() const {
   switch (type) {
@@ -213,6 +214,8 @@ std::string Value::toString() const {
     return std::string(1, charValue);
   case VAL_NULL:
     return "null";
+  case VAL_FUNCTION:
+    return "[Function " + stringValue + "]";
   default:
     return "[Unknown]";
   }
